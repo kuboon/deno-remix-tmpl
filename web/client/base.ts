@@ -4,7 +4,7 @@
  * Every URL the site emits carries this, and no output path does. The Pages workflow passes the
  * full public URL in `BASE_URL`; locally it is unset and the site is served from the root.
  *
- * Only the static build has a prefix. A live server (`deno serve`, Deno Deploy) is always served
+ * Only the static build has a prefix. A live server (`deno serve`, Cloudflare Workers) is always served
  * from its own origin's root, so the `dev` permission set ignores `BASE_URL` and the prefix is
  * empty there whatever the shell exports. A server-mode app can delete this file — see
  * `TEMPLATE.md`.

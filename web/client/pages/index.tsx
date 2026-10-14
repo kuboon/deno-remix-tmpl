@@ -21,8 +21,8 @@ export default function Home(_handle: Handle) {
           GitHub Pages (静的版)
         </a>
         {" / "}
-        <a href="https://deno-remix-reference.kuboon-tokyo.deno.net/">
-          Deno Deploy (サーバー版)
+        <a href="https://deno-remix-tmpl.kuboon.workers.dev/">
+          Cloudflare Workers (サーバー版)
         </a>
       </p>
 
@@ -47,12 +47,16 @@ export default function Home(_handle: Handle) {
       <section mix={cardStyle}>
         <h2>デプロイ</h2>
         <p>
-          同じ <code>web/server/router.tsx</code> を 2 通りに使います。
+          同じ <code>web/server/router.tsx</code>{" "}
+          から静的サイトを作り、2 通りに配信します。
         </p>
         <ul mix={listStyle}>
           <li>
-            <strong>Deno Deploy</strong> — <code>deno serve</code>{" "}
-            でライブサーバーとして動かす。<code>/api/*</code> もここだけ。
+            <strong>Cloudflare Workers</strong>{" "}
+            — 静的ビルドを Workers の static assets として配信し、<code>
+              /api/*
+            </code>{" "}
+            だけを Worker (<code>web/server/worker.ts</code>) が答える。
           </li>
           <li>
             <strong>GitHub Pages</strong>{" "}
@@ -65,7 +69,7 @@ export default function Home(_handle: Handle) {
       </section>
 
       <section mix={cardStyle}>
-        <h2>API エンドポイント (Deno Deploy のみ)</h2>
+        <h2>API エンドポイント (Cloudflare Workers のみ)</h2>
         <ul mix={listStyle}>
           <li>
             <code>GET {routes.api.protected.get.href()}</code>{" "}

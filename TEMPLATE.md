@@ -15,13 +15,13 @@
 
 **server API（`/api/*`、サーバー側の DB・秘密鍵）を使うか。**
 
-|                           | static モード                         | server モード                                   |
-| ------------------------- | ------------------------------------- | ----------------------------------------------- |
-| 使う条件                  | server API を使わない                 | server API を使う                               |
-| 配信                      | SSG → GitHub Pages                    | ライブサーバー（Deno Deploy または Cloudflare） |
-| `@remix-kbn/ssg` のビルド | 使う（`deno task build`）             | 使わない（ライブラリとしては残る）              |
-| Pages deploy              | する（`.github/workflows/pages.yml`） | **しない**                                      |
-| デプロイ設定              | 不要                                  | **必要**（下記）                                |
+|                           | static モード                         | server モード                           |
+| ------------------------- | ------------------------------------- | --------------------------------------- |
+| 使う条件                  | server API を使わない                 | server API を使う                       |
+| 配信                      | SSG → GitHub Pages                    | SSG + Worker → Cloudflare Workers       |
+| `@remix-kbn/ssg` のビルド | 使う（`deno task build`）             | 使う（`deno task build:cf` の中で走る） |
+| Pages deploy              | する（`.github/workflows/pages.yml`） | **しない**                              |
+| デプロイ設定              | 不要                                  | **必要**（下記）                        |
 
 DPoP セッション（サインイン）と push 通知の購読/テストは **ブラウザ → id.kbn.one
 の直接通信**なので、 **static モードでもある程度動く**。static で動かないのは
@@ -31,10 +31,17 @@ server API に依存する機能だけ （サーバーからの通知送信 =
 ### static モードにする
 
 削除: `[feature:server-send]` `[feature:turso]`
-`[feature:protected-api]`（下の機能表）。
+`[feature:protected-api]`（下の機能表）。加えて Cloudflare 一式（下記）。
 
 残す: `.github/workflows/pages.yml`、`mise.toml` の `build`、`router.tsx` の
 `fileServer` / `entryPoints`。
+
+Cloudflare 一式の削除: `cloudflare.config.ts`、`web/server/worker.ts`、
+`web/server/cf_build.ts`、`.github/workflows/cloudflare.yml`、`test.yml` の
+`build:cf` / `cf deploy` 行、ルートと `web/server/deno.json` の `build:cf` /
+`build:worker` / `cf` タスク、`.gitignore` の `web/worker-dist/`
+`.cloudflare/`、 ルート `deno.json` の `cf` `@cloudflare/*` と `fmt`/`lint`
+の除外。
 
 消した後に直す場所（scratch worktree で実際に消して `check` / `test` / `build`
 を回して確かめた）:
@@ -55,20 +62,20 @@ server API に依存する機能だけ （サーバーからの通知送信 =
 
 ### server モードにする
 
-削除（scratch worktree で実際に消して `check` / `test` と `deno serve` の smoke
-を通した）:
+server モードは **静的ビルドを Cloudflare Workers の static assets
+として配信し、 server API だけを
+Worker（`web/server/worker.ts`）で答える**。ページは SSG のまま
+なので、`@remix-kbn/ssg` のビルド（`build`）、`router.tsx` の `fileServer` /
+`entryPoints` は残す。
 
-- `.github/workflows/pages.yml`、`mise.toml` の `build` タスク
-- ルートと `web/server/deno.json` の `build` タスク、`web/server/deno.json` の
-  `permissions.build`
-- `router.tsx`:
-  `fileServer`（`githubPages()`）、`entryPoints`、`FileServerBehavior` /
-  `githubPages` / `stripBase` の import、`ogPaths` の import（残すと lint
-  の未使用変数で落ちる）
+削除（scratch worktree での確認は未実施。消したら `check` / `test` / `build:cf`
+を回す）:
+
+- `.github/workflows/pages.yml`、`mise.toml` の `build` タスク（Pages の deploy
+  を止める場合）
 - **base（デプロイ先のサブパス）**: サブパスは Pages の PR
-  プレビュー等で生じるもので、ライブサーバーは常にオリジンのルートで配信される。
-  テンプレのままでも `dev` 権限が `BASE_URL` を ignore するので server
-  では空だが、server モードでは仕組みごと消す:
+  プレビュー等で生じるもので、Workers は常にオリジンのルートで配信される。Pages
+  も止めるなら仕組みごと消す:
   - `client/base.ts` を削除し、`base` の import をすべて外す（`routes.ts` は
     `route(base, {` → `route("", {`、`layout.tsx` は `BASE_META_NAME` の
     `<meta>` とそのコメント、`router.tsx` は `export { base }`）
@@ -81,30 +88,29 @@ server API に依存する機能だけ （サーバーからの通知送信 =
     `siteUrl`（`ogImage` は `path` を返し、カードの footer は `location`）
   - `web/server/deno.json` の `dev` 権限の `BASE_URL`
 
-`@remix-kbn/ssg` の **ビルドは使わない**が、パッケージ自体は残る: `router.tsx`
-が `createFileTree`（`@remix-kbn/ssg/site`）を使っている。ssg
-を依存から外すなら、これを自前に置き換える。
+**Cloudflare へのデプロイ**
 
-**デプロイ先（どちらか一つ）**
-
-- **Deno Deploy（検証済み）**: エントリポイントを `web/server/router.tsx`
-  にする。環境変数は `CLAUDE.md` の「環境変数」。ビルド時の `Deno.bundle`
-  が起動時に走るので、実行環境に read 権限が要る。
-- **Cloudflare（未検証・書き換えが必要）**: 現状のルーターは Deno
-  専用の部分がある。
-  - `Deno.bundle`（`@remix-kbn/assets-deno` が起動時に実行）→ Workers
-    では動かない。事前ビルドした chunk
-    を静的アセットとして配信し、`render({ assets })` に渡す asset server
-    を自前で用意する。
-  - `Deno.readTextFile`（`sw.js`、blog の `.md`、og のフォント）→
-    ビルド時に埋め込む。
-  - `createFileTree`（fs / `node:path`）→ Workers の static assets
-    に置き換える。
-  - `DenoKvRepo`（`middleware/dpop.ts`）→ `@kuboon/kv` の別実装（Turso
-    など）に差し替える。
-  - `wrangler` が `jsr:` / `npm:` specifier を解決できるかを先に確認する。
-    `@remix-kbn` に Workers
-    用アダプタは今のところ無い。実行して確かめていない設定は書かない。
+- `cloudflare.config.ts`: Worker 名、`compatibilityDate`、`runWorkerFirst`
+  （Worker に回すパス）、公開変数（`IDP_ORIGIN` /
+  `RP_ORIGIN`）を自分のアプリ用に
+  直す。秘密（`RP_SIGNING_KEY_JWK`、`TURSO_*`）は設定に書かず Worker の secret
+  に 置く。
+- ビルド: `deno task build:cf`。`cf build` は使わない（Wrangler か Vite
+  プラグインを呼ぶだけで、`jsr:` / `deno.json` の imports
+  を解決できない）。代わりに `deno bundle` で `worker.ts` を
+  `web/worker-dist/worker.js` にまとめ、 `web/server/cf_build.ts` が `web/dist`
+  と合わせて Build Output Specification （`.cloudflare/output/v0`）を書く。
+- デプロイ:
+  `deno task cf deploy --prebuilt`（`.github/workflows/cloudflare.yml`。 repo
+  secret に `CLOUDFLARE_API_TOKEN`。アカウント ID は秘密ではないので
+  `cloudflare.config.ts` の `accountId` に書く）。`cf` は beta で Build Output
+  Specification は `v0`（草案）。上げるときは
+  `deno task cf deploy --prebuilt --dry-run` が通ることを確認する。
+- Worker が使うのは `web/server/worker.ts` から辿れるコードだけ。API を足したら
+  `worker.ts` にも配線する（`router.tsx` だけに足すと Cloudflare に出ない）。
+- DPoP セッション（`middleware/dpop.ts`）は `TURSO_DATABASE_URL` があれば
+  Turso、 無ければメモリ。メモリは isolate ごとなので、本番では Turso
+  を設定する。
 
 ## ステージ 1: 改変 init（使うコードを自分のアプリ用に書き換える）
 
@@ -136,9 +142,9 @@ server API に依存する機能だけ （サーバーからの通知送信 =
 | `helper`         | `client/helper/`                                                                                                      | `assets.ts` の `helper/panel.ts`、`runtime.ts` の `helper`、`layout.tsx` の Help ボタンと `ClientRuntime.helper`、`hydration.ts` の `installHelper()`、`spa/entry.ts`、`router.tsx` の `entryPoints` 末尾、`deno.json` の `@remix-kbn/helper-agent/*` | —                       |
 | `signin`         | `client/islands/{nav_auth,signin_card}.tsx`、`client/session.ts`、`client/idp.ts`、`client/pages/my.tsx`              | `routes.ts` の `my`、`layout.tsx` の `<NavAuth>`、`router.tsx`、`deno.json` の `@kuboon/dpop`                                                                                                                                                         | `push` は signin に依存 |
 | `push`           | `client/islands/push_card.tsx`、`client/lib/push/`、`client/sw.js`                                                    | `router.tsx` の `/sw.js` ルートと `entryPoints`、`pages/my.tsx` の `<PushCard>`                                                                                                                                                                       | `signin`                |
-| `server-send`    | `server/lib/push/`、`server/lib/signing-key*`、`server/controllers/api/notify.ts`、`server/controllers/well_known.ts` | `routes.ts` の `jwks` と `api.notify`、`router.tsx`、`push_card.tsx` の「サーバーから送信」、`server/config.ts` の `RP_*`                                                                                                                             | `push`、server モード   |
-| `turso`          | `server/lib/turso/`、`server/controllers/api/turso.ts`、`web/tests/turso_*`                                           | `routes.ts` の `api.turso`、`router.tsx`、`server/config.ts` の `TURSO_*`、`deno.json` の `@libsql/client` `@remix-run/data-table` `@remix-kbn/data-table-sqlite-turso`                                                                               | server モード           |
-| `protected-api`  | `server/controllers/api/controller.ts`、`server/middleware/dpop.ts`、`packages/*`                                     | `routes.ts` の `api.protected`、`router.tsx`、`deno.json` の `@scope/*` と workspace                                                                                                                                                                  | server モード           |
+| `server-send`    | `server/lib/push/`、`server/lib/signing-key*`、`server/controllers/api/notify.ts`、`server/controllers/well_known.ts` | `routes.ts` の `jwks` と `api.notify`、`router.tsx`、`worker.ts`、`push_card.tsx` の「サーバーから送信」、`server/config.ts` の `RP_*`                                                                                                                | `push`、server モード   |
+| `turso`          | `server/lib/turso/`、`server/controllers/api/turso.ts`、`web/tests/turso_*`                                           | `routes.ts` の `api.turso`、`router.tsx`、`worker.ts`、`server/config.ts` の `TURSO_*`、`deno.json` の `@libsql/client` `@remix-run/data-table` `@remix-kbn/data-table-sqlite-turso`                                                                  | server モード           |
+| `protected-api`  | `server/controllers/api/controller.ts`、`server/middleware/dpop.ts`、`packages/*`                                     | `routes.ts` の `api.protected`、`router.tsx`、`worker.ts`、`deno.json` の `@scope/*` と workspace                                                                                                                                                     | server モード           |
 
 `api` の中身が全部消えたら、`routes.ts` の `api` 自体と `router.tsx` の `api`
 controller も消す。 `og/`（社会カード）は全ページが使うので残す。要らなければ

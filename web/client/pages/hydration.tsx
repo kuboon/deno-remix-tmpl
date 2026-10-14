@@ -13,7 +13,7 @@ export const hydrate = true;
 
 export default function Hydration(_handle: Handle) {
   // `initialCount` seeds the component state once during setup. On the static
-  // build this is decided at build time; on Deno Deploy it is per request.
+  // build this is decided at build time; under `deno serve` it is per request.
   const initialCount = Math.floor(Math.random() * 10);
   const label = `rendered at ${new Date().toISOString()}`;
 

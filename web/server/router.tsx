@@ -9,8 +9,10 @@
  * What is exported is a plain `@remix-run/fetch-router` router, and it is deployed two ways from
  * this one file:
  *
- * - **Deno Deploy** runs `deno serve router.tsx`: the pages *and* the server-only routes (`/api/*`,
- *   `/.well-known/jwks.json`) answer live.
+ * - **Locally** `deno serve router.tsx` answers the pages *and* the server-only routes (`/api/*`,
+ *   `/.well-known/jwks.json`) live. This is also what the tests run against.
+ * - **Cloudflare Workers** serves the static build below as static assets and answers only the
+ *   server-only routes, from `worker.ts` — this file uses Deno-only APIs and is not deployed there.
  * - **GitHub Pages** is `@remix-kbn/ssg` crawling this same object with `fetch()` and writing each
  *   response to disk. It starts from `entryPoints` and follows links, and nothing links to the
  *   server-only routes, so `/api/*` is never generated.

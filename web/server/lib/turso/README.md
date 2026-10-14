@@ -13,7 +13,7 @@
   このパッケージが各クライアント呼び出しを await するので Turso を扱える。
 - `@libsql/client` — libSQL クライアント。アプリ側は edge 対応の
   `@libsql/client/web`(fetch/WebSocket のみ、ネイティブ addon 無し)を使うので
-  Deno Deploy でそのまま動く。
+  Cloudflare Workers でそのまま動く。
 
 ```ts
 import { createClient } from "@libsql/client/web";
@@ -42,7 +42,7 @@ const db = createTursoDatabase(client);
 
 > ローカルで `deno serve -P` する場合、Turso ホストへの `net` 許可が必要
 > (`web/server/deno.json` の `permissions.dev.net` に自分の `*.turso.io`
-> ホストを追加)。Deno Deploy ではプラットフォームが付与するので不要。
+> ホストを追加)。Cloudflare Workers では不要。
 
 ## テスト
 
@@ -59,4 +59,4 @@ addon が FFI を使うため `-A` で走る `deno task test:browser` に含め�
 - **embedded replica**(ローカル同期ファイル + バックグラウンド同期)を使いたい
   場合は `@libsql/client` のローカル/replica クライアントをそのまま
   `createTursoDatabase` に渡せる(ネイティブ addon + 永続ファイルシステムが
-  要るため Deno Deploy のエッジでは不可)。
+  要るため Workers のエッジでは不可)。
