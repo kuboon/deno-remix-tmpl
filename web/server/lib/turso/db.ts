@@ -10,7 +10,7 @@
  * `Client` (remote, embedded replica, or a local `file:`/`:memory:` client in
  * tests). `getTursoDb()` is the app wrapper that builds a `@libsql/client/web`
  * client from the environment — the fetch/WebSocket build with no native addon,
- * so it runs on Deno Deploy (edge). Returns `null` when Turso is unconfigured.
+ * so it runs on Cloudflare Workers (edge). Returns `null` when Turso is unconfigured.
  */
 
 import { type Client, createClient } from "@libsql/client/web";

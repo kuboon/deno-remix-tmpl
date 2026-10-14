@@ -10,6 +10,8 @@
     "dev": "deno task --cwd web/server dev",
     "serve": "deno task --cwd web/server serve",
     "build": "deno task --cwd web/server build",
+    "build:cf": "deno task --cwd web/server build:cf",
+    "cf": "deno run -A npm:cf",
     "test": "deno test -P --ignore=web/tests",
     "test:browser": "deno task --cwd web/tests test",
     "check": "deno task --cwd web/client check && deno task --cwd web/server check && deno check packages && deno lint && deno fmt --check"
@@ -47,6 +49,8 @@
     "jsxImportSource": "@remix-run/component"
   },
   "imports": {
+    "@cloudflare/build-output-utils": "npm:@cloudflare/build-output-utils@0.9.1",
+    "@cloudflare/config": "npm:@cloudflare/config@0.25.0",
     "@kuboon/dpop": "jsr:@kuboon/dpop@^0.1.2",
     "@kuboon/kv": "jsr:@kuboon/kv@^0.2.0",
     "@kuboon/md": "jsr:@kuboon/md@^0.7.0",
@@ -69,6 +73,7 @@
     "@std/assert": "jsr:@std/assert@^1.0.19",
     "@std/front-matter": "jsr:@std/front-matter@^1.0.9",
     "canvaskit-wasm": "npm:canvaskit-wasm@^0.40.0",
+    "cf": "npm:cf@1.0.0-beta.16",
     "jose": "jsr:@panva/jose@^6.2.3",
     "puppeteer-core": "npm:puppeteer-core@^23.11.1"
   },
@@ -80,12 +85,16 @@
   "fmt": {
     "exclude": [
       "web/dist",
+      "web/worker-dist",
+      ".cloudflare",
       "node_modules"
     ]
   },
   "lint": {
     "exclude": [
       "web/dist",
+      "web/worker-dist",
+      ".cloudflare",
       "node_modules"
     ]
   }

@@ -3,6 +3,12 @@
     "dev": "deno serve -P=dev --watch --port 8000 router.tsx",
     "serve": "deno serve -P=dev router.tsx",
     "build": "deno run -c deno.json -P=build jsr:@remix-kbn/ssg/build.ts --out ../dist",
+    "build:worker": "deno bundle --platform=browser --external=cloudflare:workers -o ../worker-dist/worker.js worker.ts",
+    "build:cf": {
+      "description": "Static site + Worker bundle, arranged as the Build Output for `cf deploy --prebuilt`",
+      "dependencies": ["build", "build:worker"],
+      "command": "deno run -A cf_build.ts"
+    },
     "check": "deno check ."
   },
   "permissions": {

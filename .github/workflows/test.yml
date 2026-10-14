@@ -17,4 +17,6 @@ jobs:
       - run: deno task check
       - run: deno task test
       - run: deno task build
+      - run: deno task build:cf
+      - run: deno task cf deploy --prebuilt --dry-run
       - run: deno task test:browser

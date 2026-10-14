@@ -50,7 +50,7 @@ id.kbn.one 連携の push 通知を含む。
   v3 fetch-router 用)。`context.get(DpopSession)` でアクセスでき、
   `@remix-run/session` の `Session` と共存可能。DPoP proof 生成・検証は
   [jsr:@kuboon/dpop](https://jsr.io/@kuboon/dpop) を利用。
-- `web/` — Remix v3 リファレンス Web アプリ (Deno Deploy へ server
+- `web/` — Remix v3 リファレンス Web アプリ (Cloudflare Workers へ server
   として、GitHub Pages
   へ静的サイトとして同時にデプロイ。派生アプリはどちらか一方を選ぶ —
   `TEMPLATE.md`)
@@ -105,7 +105,7 @@ Deno で catch 不能なエラーになる)。env は top-level await
   生成
   (開発用)。本番では固定鍵を設定し、再起動で鍵がローテートしないようにする。
 - `BASE_URL` — 静的ビルド専用。Pages のサブパス（PR プレビュー等）を `base`
-  にする。server（`deno serve` / Deno Deploy）は常にルート配信なので読まない
+  にする。server（`deno serve` / Cloudflare）は常にルート配信なので読まない
   （`web/server/deno.json` の `dev` 権限で ignore）。
 - `TURSO_DATABASE_URL` / `TURSO_AUTH_TOKEN` — `GET /api/turso` サンプル用の
   Turso (libSQL) 接続。未設定なら 503 を返すのみ。
@@ -119,14 +119,28 @@ Deno で catch 不能なエラーになる)。env は top-level await
 (`createTursoDatabase(client)`) を使う。クライアントは edge 対応の
 `@libsql/client/web`。詳細は `web/server/lib/turso/README.md`。
 
-## デプロイ (Deno Deploy + GitHub Pages)
+## デプロイ (Cloudflare Workers + GitHub Pages)
 
-`web/server/router.tsx` が唯一のエントリ。default export は素の
-`@remix-run/fetch-router` の router で、2 通りに使う。
+`web/server/router.tsx` が唯一のルーター定義で、素の `@remix-run/fetch-router`
+の router を default export する。ローカル (`deno serve`)
+とテストはこれをそのまま使い、デプロイは 2 通り。
 
-- **Deno Deploy**: エントリポイント `web/server/router.tsx`
-  (`deno serve`)。ページと server 専用ルート (`/api/*`,
-  `/.well-known/jwks.json`) の両方がライブで応答する。
+- **Cloudflare Workers**: `.github/workflows/cloudflare.yml` が
+  `deno task
+  build:cf` を走らせ、**静的ビルド (`web/dist`) を Workers の
+  static assets** として、**server 専用ルート (`/api/*`,
+  `/.well-known/jwks.json`) だけを Worker (`web/server/worker.ts`)**
+  で配信する。`router.tsx` は `Deno.bundle` / `Deno.readTextFile` を使うので
+  Workers では動かさない。
+  - `cloudflare.config.ts` が `cf` CLI の設定 (`assets.runWorkerFirst` で Worker
+    に回すパスを指定)。
+  - `cf build` は Wrangler か Vite プラグインを呼ぶだけで `jsr:` を解決できない
+    ので使わない。`deno bundle` で作った Worker (`web/worker-dist/worker.js`) と
+    `web/dist` を `web/server/cf_build.ts` が Build Output Specification
+    (`.cloudflare/output/v0`) に並べ、`cf deploy --prebuilt` でアップロードする
+    (`deno task cf ...` が `npm:cf` の実行)。
+  - DPoP セッションの保存先は `TURSO_DATABASE_URL` があれば Turso、無ければ
+    メモリ (isolate ごとなので本番では Turso を設定する)。
 - **GitHub Pages**: `.github/workflows/pages.yml` が `deno task build`
   (`@remix-kbn/ssg`) を走らせ、同じ router を `fetch()` でクロールして
   `web/dist` に静的 HTML を書き出す。クロールは `entryPoints` (`/`、og
@@ -143,6 +157,7 @@ Deno で catch 不能なエラーになる)。env は top-level await
 ```bash
 deno task dev      # web アプリの開発サーバー起動
 deno task build    # GitHub Pages 用の静的サイトを web/dist へ生成
+deno task build:cf # 静的サイト + Worker を .cloudflare/output へ (cf deploy --prebuilt 用)
 deno task test     # パッケージ/サーバーのテスト実行
 deno task test:browser  # ブラウザ smoke テスト (lightpanda)
 deno task check    # 型チェック + lint + fmt
