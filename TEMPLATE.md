@@ -102,8 +102,9 @@ Worker（`web/server/worker.ts`）で答える**。ページは SSG のまま
   と合わせて Build Output Specification （`.cloudflare/output/v0`）を書く。
 - デプロイ:
   `deno task cf deploy --prebuilt`（`.github/workflows/cloudflare.yml`。 repo
-  secret に `CLOUDFLARE_API_TOKEN` と `CLOUDFLARE_ACCOUNT_ID`）。`cf` は beta で
-  Build Output Specification は `v0`（草案）。上げるときは
+  secret に `CLOUDFLARE_API_TOKEN`。アカウント ID は秘密ではないので
+  `cloudflare.config.ts` の `accountId` に書く）。`cf` は beta で Build Output
+  Specification は `v0`（草案）。上げるときは
   `deno task cf deploy --prebuilt --dry-run` が通ることを確認する。
 - Worker が使うのは `web/server/worker.ts` から辿れるコードだけ。API を足したら
   `worker.ts` にも配線する（`router.tsx` だけに足すと Cloudflare に出ない）。

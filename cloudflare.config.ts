@@ -9,6 +9,8 @@
 import { bindings, defineConfig } from "cf/config";
 
 export default defineConfig({
+  // Not a secret: it is only an identifier, and the API token is what authorizes.
+  accountId: "ac92f36f0a2d84353b137574157f7480",
   worker: {
     name: "deno-remix-tmpl",
     compatibilityDate: "2026-10-01",
