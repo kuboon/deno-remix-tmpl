@@ -27,9 +27,10 @@ export default defineConfig({
       // Secrets, set once with `deno task cf workers secrets update <NAME> --worker deno-remix-tmpl
       // --type secret_text --text ...`; declared here so a deploy keeps them.
       RP_SIGNING_KEY_JWK: bindings.secret(),
-      // Optional (without them `/api/turso` answers 503 and DPoP sessions stay in memory):
-      // TURSO_DATABASE_URL: bindings.secret(),
-      // TURSO_AUTH_TOKEN: bindings.secret(),
+      TURSO_DATABASE_URL: bindings.text(
+        "libsql://deno-remix-reference-kuboon.aws-ap-northeast-1.turso.io",
+      ),
+      TURSO_AUTH_TOKEN: bindings.secret(),
     },
   },
 });
