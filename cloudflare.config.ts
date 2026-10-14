@@ -23,8 +23,13 @@ export default defineConfig({
     },
     env: {
       IDP_ORIGIN: bindings.text("https://id.kbn.one"),
-      // RP_ORIGIN: bindings.text("https://<your-worker-domain>"),
-      // Secrets (`cf workers secrets ...`): RP_SIGNING_KEY_JWK, TURSO_DATABASE_URL, TURSO_AUTH_TOKEN
+      RP_ORIGIN: bindings.text("https://deno-remix-tmpl.kuboon.workers.dev"),
+      // Secrets, set once with `deno task cf workers secrets update <NAME> --worker deno-remix-tmpl
+      // --type secret_text --text ...`; declared here so a deploy keeps them.
+      RP_SIGNING_KEY_JWK: bindings.secret(),
+      // Optional (without them `/api/turso` answers 503 and DPoP sessions stay in memory):
+      // TURSO_DATABASE_URL: bindings.secret(),
+      // TURSO_AUTH_TOKEN: bindings.secret(),
     },
   },
 });
