@@ -139,6 +139,10 @@ Deno で catch 不能なエラーになる)。env は top-level await
     `web/dist` を `web/server/cf_build.ts` が Build Output Specification
     (`.cloudflare/output/v0`) に並べ、`cf deploy --prebuilt` でアップロードする
     (`deno task cf ...` が `npm:cf` の実行)。
+  - 両 router（`router.tsx` と `worker.ts`）に `@remix-run/cop-middleware` の
+    `cop()` を入れてある。`Sec-Fetch-Site` / `Origin` で、クロスオリジンの
+    ブラウザからの unsafe メソッド（`POST /api/notify` など）を token 無しで
+    拒否する。別オリジンから API を叩く構成にするなら `trustedOrigins` を足す。
   - DPoP セッションの保存先は `TURSO_DATABASE_URL` があれば Turso、無ければ
     メモリ (isolate ごとなので本番では Turso を設定する)。
 - **GitHub Pages**: `.github/workflows/pages.yml` が `deno task build`

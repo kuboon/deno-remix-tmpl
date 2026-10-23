@@ -23,6 +23,7 @@ import {
   createRouter,
   type RouterContext,
 } from "@remix-run/fetch-router";
+import { cop } from "@remix-run/cop-middleware";
 import { render } from "@remix-run/render-middleware";
 import { createFileTree, githubPages } from "@remix-kbn/ssg/site";
 import { stripBase } from "@remix-kbn/ssg/base";
@@ -99,8 +100,12 @@ const serviceWorker = await Deno.readTextFile(
   new URL("../client/sw.js", import.meta.url),
 );
 
-/** `render({ assets })` puts `context.render(node)` on every request. */
-const router = createRouter({ middleware: [render({ assets })] });
+/**
+ * `cop()` rejects unsafe cross-origin browser requests (`POST /api/notify`, the protected API) by
+ * `Sec-Fetch-Site` / `Origin`, without tokens. `render({ assets })` puts `context.render(node)` on
+ * every request.
+ */
+const router = createRouter({ middleware: [cop(), render({ assets })] });
 
 /** The request context those middlewares produce — `context.render`, in practice. */
 export type AppContext = RouterContext<typeof router>;

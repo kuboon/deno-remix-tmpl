@@ -30,6 +30,7 @@
     "npm:@libsql/client@~0.17.4": "0.17.4",
     "npm:@lightpanda/browser@^1.2.0": "1.2.0",
     "npm:@remix-run/component@1": "1.0.0",
+    "npm:@remix-run/cop-middleware@1": "1.0.0",
     "npm:@remix-run/data-table@1": "1.0.0",
     "npm:@remix-run/fetch-router@1": "1.0.0",
     "npm:@remix-run/render-middleware@1": "1.0.0_@emnapi+core@1.11.2_@emnapi+runtime@1.11.2",
@@ -1243,6 +1244,12 @@
       "integrity": "sha512-89stfiyRE+99sQDbX5Hu56ro44a15Mhh7OYev3lJ+7ZJgOLRjrjymahzS0p4A6J19e4U5rOBUqa8BJvUHm0eig==",
       "dependencies": [
         "@types/dom-navigation"
+      ]
+    },
+    "@remix-run/cop-middleware@1.0.0": {
+      "integrity": "sha512-yM+iAFg218cS1zLTwoPRUdxSqxmN27pexxg6z0eNRcTFXUcyrVe9lhbaYUGUuI316wGCoh1eiTGuUjkDDbv3qw==",
+      "dependencies": [
+        "@remix-run/fetch-router"
       ]
     },
     "@remix-run/data-table@1.0.0": {
@@ -3188,6 +3195,7 @@
       "npm:@libsql/client@~0.17.4",
       "npm:@lightpanda/browser@^1.2.0",
       "npm:@remix-run/component@1",
+      "npm:@remix-run/cop-middleware@1",
       "npm:@remix-run/data-table@1",
       "npm:@remix-run/fetch-router@1",
       "npm:@remix-run/render-middleware@1",

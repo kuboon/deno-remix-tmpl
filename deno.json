@@ -64,6 +64,7 @@
     "@remix-kbn/helper-agent/controller": "jsr:@remix-kbn/helper-agent@^0.3.0/controller",
     "@remix-kbn/ssg": "jsr:@remix-kbn/ssg@^0.13.0",
     "@remix-run/component": "npm:@remix-run/component@^1.0.0",
+    "@remix-run/cop-middleware": "npm:@remix-run/cop-middleware@^1.0.0",
     "@remix-run/data-table": "npm:@remix-run/data-table@^1.0.0",
     "@remix-run/fetch-router": "npm:@remix-run/fetch-router@^1.0.0",
     "@remix-run/render-middleware": "npm:@remix-run/render-middleware@^1.0.0",
