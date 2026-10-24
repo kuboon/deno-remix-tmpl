@@ -3,7 +3,8 @@
 opt-in のブラウザテスト。デフォルトの `deno task test`
 には含まれず、`deno
 task test:browser` で明示的に起動する。 lightpanda
-バイナリは npm:@lightpanda/browser の postinstall scriptでビルドされる。
+バイナリは `deno run -A npm:@lightpanda/browser install` で取得する
+(@lightpanda/browser 1.6 以降は install 時に自動取得しない。CI も同じ手順)。
 
 ## 前提
 
