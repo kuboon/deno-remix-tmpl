@@ -149,7 +149,6 @@ export const AccordionDemo = clientEntry(
                     key="multiple"
                     type="multiple"
                     defaultValue={["account"]}
-                    headingLevel={headingLevel as 1 | 2 | 3 | 4 | 5 | 6}
                   >
                     {items}
                   </accordion.Context>
@@ -160,7 +159,6 @@ export const AccordionDemo = clientEntry(
                     type="single"
                     defaultValue="account"
                     collapsible={collapsible}
-                    headingLevel={headingLevel as 1 | 2 | 3 | 4 | 5 | 6}
                   >
                     {items}
                   </accordion.Context>

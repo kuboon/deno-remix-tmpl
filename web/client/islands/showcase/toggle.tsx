@@ -1,5 +1,5 @@
 import { clientEntry, css, type Handle } from "@remix-run/component";
-import * as toggle from "@remix-run/ui/toggle";
+import { toggle } from "@remix-run/ui/toggle";
 
 import { theme } from "./_lib/tokens.ts";
 import { DemoCard, Readout } from "./_lib/controls.tsx";
@@ -71,7 +71,7 @@ export const ToggleDemo = clientEntry(
                 type="checkbox"
                 mix={[
                   switchMix,
-                  toggle.control({ defaultChecked: true }),
+                  toggle({ defaultChecked: true }),
                 ]}
               />
               Email notifications
@@ -81,14 +81,14 @@ export const ToggleDemo = clientEntry(
                 type="checkbox"
                 // Always pass an options object: the server renderer appends the host props
                 // positionally, so an empty call would hand them to `options` instead.
-                mix={[switchMix, toggle.control({})]}
+                mix={[switchMix, toggle({})]}
               />
               Weekly digest
             </label>
             <label mix={rowStyle}>
               <input
                 type="checkbox"
-                mix={[switchMix, toggle.control({ disabled: true })]}
+                mix={[switchMix, toggle({ disabled: true })]}
               />
               SMS alerts (disabled)
             </label>
@@ -97,7 +97,7 @@ export const ToggleDemo = clientEntry(
         controls={
           <>
             <Readout>
-              {`<input type="checkbox" mix={toggle.control({ defaultChecked: true })} />`}
+              {`<input type="checkbox" mix={toggle({ defaultChecked: true })} />`}
             </Readout>
           </>
         }
