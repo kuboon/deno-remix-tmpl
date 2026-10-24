@@ -2,6 +2,7 @@
   "version": "5",
   "specifiers": {
     "jsr:@deno/loader@0.5": "0.5.0",
+    "jsr:@kuboon/chat-element@0.1": "0.1.0",
     "jsr:@kuboon/dpop@~0.1.1": "0.1.2",
     "jsr:@kuboon/dpop@~0.1.2": "0.1.2",
     "jsr:@kuboon/kv@0.2": "0.2.0",
@@ -10,7 +11,7 @@
     "jsr:@panva/jose@^6.2.3": "6.2.12",
     "jsr:@remix-kbn/assets-deno@0.9": "0.9.0",
     "jsr:@remix-kbn/data-table-sqlite-turso@0.6": "0.6.0",
-    "jsr:@remix-kbn/helper-agent@0.3": "0.3.0",
+    "jsr:@remix-kbn/helper-agent@0.4": "0.4.0",
     "jsr:@remix-kbn/ssg@*": "0.13.0",
     "jsr:@remix-kbn/ssg@0.13": "0.13.0",
     "jsr:@std/assert@^1.0.19": "1.0.19",
@@ -29,7 +30,6 @@
     "npm:@cloudflare/config@0.25.0": "0.25.0",
     "npm:@libsql/client@~0.17.4": "0.17.4",
     "npm:@lightpanda/browser@^1.2.0": "1.2.0",
-    "npm:@remix-run/component@1": "1.1.0",
     "npm:@remix-run/component@^1.1.0": "1.1.0",
     "npm:@remix-run/cop-middleware@1": "1.0.0",
     "npm:@remix-run/data-table@1": "1.0.0",
@@ -65,6 +65,9 @@
   "jsr": {
     "@deno/loader@0.5.0": {
       "integrity": "a6d94408de5e6bacac404f8f6963c8b8cc278cfd1a878aa2f06b34a083d6bfee"
+    },
+    "@kuboon/chat-element@0.1.0": {
+      "integrity": "fd8b9dd0f8403168718031ac2dd070e56ea1f4ef3c5e488f8c5dc6264cf5cf27"
     },
     "@kuboon/dpop@0.1.2": {
       "integrity": "30de96c140e7b23e2ebee0145c75adc9dfe04ecbe288546348bd4b619b733add",
@@ -125,10 +128,10 @@
         "npm:@remix-run/data-table"
       ]
     },
-    "@remix-kbn/helper-agent@0.3.0": {
-      "integrity": "78375006b292d0f28d2ef47d385b37708a0cc0e49e869dd33da7c58d73c3a70f",
+    "@remix-kbn/helper-agent@0.4.0": {
+      "integrity": "07569a6cf56c79ee32580c7b200f6ae8909a8255cb51e3a5562c0e9de8ed7d5e",
       "dependencies": [
-        "npm:@remix-run/component@1",
+        "jsr:@kuboon/chat-element",
         "npm:@remix-run/fetch-router"
       ]
     },
@@ -3194,7 +3197,7 @@
       "jsr:@panva/jose@^6.2.3",
       "jsr:@remix-kbn/assets-deno@0.9",
       "jsr:@remix-kbn/data-table-sqlite-turso@0.6",
-      "jsr:@remix-kbn/helper-agent@0.3",
+      "jsr:@remix-kbn/helper-agent@0.4",
       "jsr:@remix-kbn/ssg@0.13",
       "jsr:@std/assert@^1.0.19",
       "jsr:@std/front-matter@^1.0.9",
