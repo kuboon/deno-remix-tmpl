@@ -78,11 +78,6 @@
     "jose": "jsr:@panva/jose@^6.2.3",
     "puppeteer-core": "npm:puppeteer-core@^23.11.1"
   },
-  "allowScripts": {
-    "allow": [
-      "npm:@lightpanda/browser@1.6.0"
-    ]
-  },
   "fmt": {
     "exclude": [
       "web/dist",
