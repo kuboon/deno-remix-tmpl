@@ -6,9 +6,9 @@
  * server renders it to HTML like everything else and emits a hydration marker; `server/assets.ts`
  * turns the id into the chunk URL, and `run()` in `hydration.ts` imports it and hydrates in place.
  *
- * Every click also lands in the {@link clicks} store, which `total.tsx` — a *separate* entrypoint —
- * reads. That the running total agrees with however many counters are on the page is the visible
- * proof that the shared module was emitted once, into a chunk both islands import.
+ * Every change to the count also lands in the {@link clicks} store, which `total.tsx` — a *separate*
+ * entrypoint — reads. That the running total is the sum of however many counters are on the page is
+ * the visible proof that the shared module was emitted once, into a chunk both islands import.
  */
 
 import {
@@ -38,6 +38,17 @@ export const Counter = clientEntry(
     // initial value from props; subsequent prop changes do not reset count.
     let count = handle.props.initialCount;
 
+    // The store holds the sum of the counters on the page, so this one adds its value once it is on
+    // the client and takes it back out when it goes away (a soft navigation disposes it while the
+    // document, and the store, carry on). A queued task runs at the first client commit and nowhere
+    // else; on the server `handle.signal` is a stand-in, not a real `AbortSignal`.
+    handle.queueTask(() => {
+      clicks.bump(count);
+      handle.signal.addEventListener("abort", () => clicks.bump(-count), {
+        once: true,
+      });
+    });
+
     // Render phase — runs on first render and every `handle.update()`.
     return () => (
       <div mix={wrapStyle}>
@@ -48,7 +59,7 @@ export const Counter = clientEntry(
             buttonStyle,
             on("click", () => {
               count--;
-              clicks.bump();
+              clicks.bump(-1);
               handle.update();
             }),
           ]}
@@ -63,7 +74,7 @@ export const Counter = clientEntry(
             buttonStyle,
             on("click", () => {
               count++;
-              clicks.bump();
+              clicks.bump(1);
               handle.update();
             }),
           ]}
