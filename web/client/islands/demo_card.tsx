@@ -3,6 +3,7 @@
  *
  * [feature:demo-panel] Everything here exists to explain the template, not to be part of an app:
  *
+ * - "状態": the DPoP session status and this browser's key thumbprint.
  * - "仕組み": how the DPoP sign-in against the IdP (id.kbn.one) works.
  * - "サーバーから送信": the server-initiated push path. It calls this app's own `POST /api/notify`,
  *   which authenticates to the IdP with a `private_key_jwt` assertion and fans the notification out
@@ -124,12 +125,47 @@ export const DemoCard = clientEntry(
 
     return () => {
       const { idpOrigin } = handle.props;
+      const ready = sessionStore.ready;
+      const signedIn = sessionStore.userId !== null;
+      const sessionText = !ready
+        ? "セッションを確認しています…"
+        : signedIn
+        ? "セッションを取得しました。"
+        : "";
+      const sessionKind: AlertKind | "" = !ready
+        ? "info"
+        : signedIn
+        ? "success"
+        : "";
+      const userInfo = signedIn
+        ? `サインイン中: ${sessionStore.userId}`
+        : ready
+        ? "サインインしていません。"
+        : "…";
       return (
         <section mix={cardStyle}>
           <h2>デモ</h2>
           <p mix={mutedStyle}>
             このパネルはテンプレートの説明用です。アプリを作るときは削除します。
           </p>
+
+          <h3>状態</h3>
+          <div role="alert" data-kind={sessionKind} mix={alertStyle}>
+            <span>{sessionText}</span>
+          </div>
+          <p>{userInfo}</p>
+          <p>
+            このブラウザの DPoP thumbprint:{" "}
+            <code>{sessionStore.thumbprint || "…"}</code>
+          </p>
+          {ready && !signedIn
+            ? (
+              <p>
+                サインインするには、ナビバー右上の「Sign
+                In」ボタンを使用してください。
+              </p>
+            )
+            : null}
 
           <h3>仕組み</h3>
           <ol mix={listStyle}>
@@ -187,9 +223,6 @@ export const DemoCard = clientEntry(
             </button>
           </div>
           <p mix={mutedStyle}>
-            {sessionStore.ready && !sessionStore.userId
-              ? "送信するには、ナビバー右上の「Sign In」からサインインしてください。"
-              : ""}
             「バッジ数」に数字を入れて送信すると、その値がアプリのバッジ
             (Badging API) に反映されます。空欄なら通常の通知のみ。
             「サーバーから送信」は <code>POST /api/notify</code>{" "}

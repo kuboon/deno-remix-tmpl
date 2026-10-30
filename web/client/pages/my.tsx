@@ -3,7 +3,7 @@ import type { Handle } from "@remix-run/component";
 import { IDP_ORIGIN } from "../idp.ts";
 import { DemoCard } from "../islands/demo_card.tsx";
 import { PushCard } from "../islands/push_card.tsx";
-import { SignInCard } from "../islands/signin_card.tsx";
+import { SignOutButton } from "../islands/signout_button.tsx";
 
 export const title = "マイページ — Remix3 on Deno Template";
 export const description =
@@ -24,9 +24,9 @@ export default function My(_handle: Handle) {
         In」から行います。
       </p>
 
-      <SignInCard idpOrigin={IDP_ORIGIN} />
-
       <PushCard idpOrigin={IDP_ORIGIN} />
+
+      <SignOutButton />
 
       {/* [feature:demo-panel] */}
       <DemoCard idpOrigin={IDP_ORIGIN} />

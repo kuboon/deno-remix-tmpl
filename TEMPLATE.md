@@ -125,8 +125,10 @@ Worker（`web/server/worker.ts`）で答える**。ページは SSG のまま
 - [ ] `pages/index.tsx` を自分のトップページに置き換える
 - [ ] `/my` の「デモ」パネルを削除する: `client/islands/demo_card.tsx` を消し、
       `pages/my.tsx` の `<DemoCard>`（`[feature:demo-panel]`）と import を外す。
-      パネルは「仕組み」（サインインの流れ）と「サーバーから送信」（バッジ数つき）
-      のテンプレ説明用で、アプリには要らない。`/api/notify` 自体は残る
+      パネルは「状態」（セッションと
+      thumbprint）、「仕組み」（サインインの流れ）、
+      「サーバーから送信」（バッジ数つき）のテンプレ説明用で、アプリには要らない。`/api/notify`
+      自体は残る
 
 ## ステージ 2: cleanup（実装後に使わない機能を消す）
 
@@ -144,7 +146,7 @@ Worker（`web/server/worker.ts`）で答える**。ページは SSG のまま
 | `fullscreen`     | `client/pages/fullscreen.tsx`、`client/islands/fullscreen-game.tsx`                                                   | `routes.ts`、`router.tsx`、`layout.tsx` の nav、`PageModule` の `viewport`/`bare`                                                                                                                                                                     | —                              |
 | `spa`            | `client/pages/spa.tsx`、`client/spa/`                                                                                 | `routes.ts`、`router.tsx`（`spa` controller、`spaRuntime`）、`assets.ts` の `spa/entry.ts`、`runtime.ts`、`layout.tsx` の `documentLinks` と nav、`nav_auth.tsx` の `documentLinks`、`deno.json` の `@remix-run/spa`                                  | —                              |
 | `helper`         | `client/helper/`                                                                                                      | `assets.ts` の `helper/panel.ts`、`runtime.ts` の `helper`、`layout.tsx` の Help ボタンと `ClientRuntime.helper`、`hydration.ts` の `installHelper()`、`spa/entry.ts`、`router.tsx` の `entryPoints` 末尾、`deno.json` の `@remix-kbn/helper-agent/*` | —                              |
-| `signin`         | `client/islands/{nav_auth,signin_card}.tsx`、`client/session.ts`、`client/idp.ts`、`client/pages/my.tsx`              | `routes.ts` の `my`、`layout.tsx` の `<NavAuth>`、`router.tsx`、`deno.json` の `@kuboon/dpop`                                                                                                                                                         | `push` は signin に依存        |
+| `signin`         | `client/islands/{nav_auth,signout_button}.tsx`、`client/session.ts`、`client/idp.ts`、`client/pages/my.tsx`           | `routes.ts` の `my`、`layout.tsx` の `<NavAuth>`、`router.tsx`、`deno.json` の `@kuboon/dpop`                                                                                                                                                         | `push` は signin に依存        |
 | `push`           | `client/islands/push_card.tsx`、`client/lib/push/`、`client/sw.js`                                                    | `router.tsx` の `/sw.js` ルートと `entryPoints`、`pages/my.tsx` の `<PushCard>`                                                                                                                                                                       | `signin`                       |
 | `demo-panel`     | `client/islands/demo_card.tsx`                                                                                        | `pages/my.tsx` の `<DemoCard>`                                                                                                                                                                                                                        | — (`server-send` の UI を含む) |
 | `server-send`    | `server/lib/push/`、`server/lib/signing-key*`、`server/controllers/api/notify.ts`、`server/controllers/well_known.ts` | `routes.ts` の `jwks` と `api.notify`、`router.tsx`、`worker.ts`、`demo_card.tsx` の「サーバーから送信」、`server/config.ts` の `RP_*`                                                                                                                | `push`、server モード          |
