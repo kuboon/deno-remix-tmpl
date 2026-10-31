@@ -156,6 +156,26 @@ Deno で catch 不能なエラーになる)。env は top-level await
 の「デモ」パネルの「サーバーから送信」(`POST /api/notify`) は 動かない。それ以外
 (DPoP + IdP は全てブラウザ → id.kbn.one の直接通信) は静的版でも動く。
 
+## GitHub Actions の lockfile
+
+`.github/workflows/actions.lock` は、ワークフローが使う
+action（推移的な依存を含む）を検証済みの commit に固定する
+lockfile（[GitHub の docs](https://docs.github.com/en/actions/how-tos/secure-your-work/lock-workflow-dependencies)）。
+`uses:` の `@v7` のような参照を読みやすいまま残し、実行は lockfile の commit
+になる。
+
+- 生成・更新は `gh extension install github/gh-actions-lock`
+  したうえでリポジトリのルートから `gh actions-lock`（認証済みの `gh`
+  が要る）。ワークフローを足した・消した、`uses:` を変えたら再実行して、
+  `.github/workflows/` ごと commit する。lockfile は手で編集しない。
+- `.github/workflows/verify-lockfile.yml` が PR と main で
+  `gh actions-lock --verify` を走らせる。lockfile が まだ無い間は何もしない。
+- `.github/dependabot.yml` が action の更新を出す。lockfile
+  に載っているワークフローなら、同じ PR で lockfile の対応する行も更新される。
+- 制限: 別リポジトリの再利用ワークフローの呼び出し（`pages.yml` の
+  `kuboon/workflows/...@main`）は lock
+  されない。呼び出される側のリポジトリが自分の lockfile を持つ必要がある。
+
 ## 開発
 
 ```bash

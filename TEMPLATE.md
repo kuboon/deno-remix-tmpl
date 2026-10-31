@@ -123,6 +123,10 @@ Worker（`web/server/worker.ts`）で答える**。ページは SSG のまま
 - [ ] `client/static/favicon.svg`、`tokens.ts` / `static/app.css` の配色
 - [ ] デモのリンク（`README.md`、`pages/index.tsx`）を自分のデプロイ先の URL に
 - [ ] `pages/index.tsx` を自分のトップページに置き換える
+- [ ] `gh actions-lock` を実行して `.github/workflows/actions.lock`
+      を作る（ワークフローを消したあとも
+      再実行して、消したワークフローの行を落とす）。`verify-lockfile.yml` は
+      lockfile が無い間は何もしない
 - [ ] `/my` の「デモ」パネルを削除する: `client/islands/demo_card.tsx` を消し、
       `pages/my.tsx` の `<DemoCard>`（`[feature:demo-panel]`）と import を外す。
       パネルは「状態」（セッションと
