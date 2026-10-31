@@ -48,9 +48,10 @@ export default function Hydration(_handle: Handle) {
         <p>
           3 つとも<em>
             別々のブラウザ entrypoint
-          </em>で、互いに直接は通信しません。 Counter は同じ click store を
-          import し、Total はそれを購読しているだけです。bundler がその store
-          を共有 chunk に 1 つだけ出力するので、合計が追従します。entry
+          </em>で、互いに直接は通信しません。 Counter は同じ click store に
+          自分の値の増減を書き込み、Total (Left と Right の合計)
+          はそれを購読しているだけです。bundler がその store を共有 chunk に 1
+          つだけ出力するので、合計が追従します。entry
           ごとに別々にコンパイルすると store が複製され、合計はずっと 0
           のままになります。
         </p>

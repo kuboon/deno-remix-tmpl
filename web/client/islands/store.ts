@@ -1,7 +1,7 @@
 /**
  * A cross-island singleton: module-level state two separate client entrypoints both import.
  *
- * This is the module that makes the bundling strategy observable. `click_counter.tsx` writes to it and
+ * This is the module that makes the bundling strategy observable. `counter.tsx` writes to it and
  * `total.tsx` reads from it, and they are *different* browser entrypoints. If each were compiled on
  * its own, each would get a private copy — the counter would bump its copy, the total would read
  * its own, and the page would show a total that never moves.
@@ -21,21 +21,25 @@
 
 import { TypedEventTarget } from "@remix-run/component";
 
-/** Click total, shared by every island on the page. */
+/** The sum of every counter's value on the page, shared by every island. */
 class ClickStore extends TypedEventTarget<{ change: Event }> {
   #total = 0;
 
-  /** How many times any counter has been clicked. */
+  /** What all the counters currently add up to. */
   get total(): number {
     return this.#total;
   }
 
   /**
-   * Records clicks and notifies subscribers.
+   * Adds a change in some counter's value and notifies subscribers.
    *
-   * @param by How many to add
+   * A counter registers its starting value on mount and takes it back out on unmount, so the total
+   * is the sum of the counters that are on the page — `+1` for an increment, `-1` for a decrement.
+   *
+   * @param by How much to add (negative to subtract)
    */
-  bump(by = 1): void {
+  bump(by: number): void {
+    if (by === 0) return;
     this.#total += by;
     this.dispatchEvent(new Event("change"));
   }

@@ -152,9 +152,9 @@ Deno で catch 不能なエラーになる)。env は top-level await
   `/api/*` は静的化されない。 main は Pages ルート、PR は preview
   サブパスにデプロイされる (`BASE_URL` から `base` が決まる)。
 
-静的版では API が無いので、`/my` の「サーバーから送信」(`POST /api/notify`) は
-動かない。それ以外 (DPoP + IdP は全てブラウザ → id.kbn.one の直接通信)
-は静的版でも動く。
+静的版では API が無いので、`/my`
+の「デモ」パネルの「サーバーから送信」(`POST /api/notify`) は 動かない。それ以外
+(DPoP + IdP は全てブラウザ → id.kbn.one の直接通信) は静的版でも動く。
 
 ## 開発
 

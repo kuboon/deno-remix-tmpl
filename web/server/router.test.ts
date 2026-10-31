@@ -32,6 +32,21 @@ Deno.test("GET /my embeds idp-origin meta", async () => {
   assertStringIncludes(html, "https://id.kbn.one");
 });
 
+Deno.test("GET /my has a デモ panel holding 状態, 仕組み and the server send controls", async () => {
+  const res = await router.fetch(new Request("http://x/my"));
+  const html = await res.text();
+  const demo = html.slice(html.indexOf("<h2>デモ</h2>"));
+  assertStringIncludes(demo, "<h3>状態</h3>");
+  assertStringIncludes(demo, "DPoP thumbprint");
+  assertStringIncludes(demo, "仕組み");
+  assertStringIncludes(demo, 'aria-label="バッジ数"');
+  assertStringIncludes(demo, "サーバーから送信");
+  // The push card keeps its own controls but no longer carries the demo ones.
+  const before = html.slice(0, html.indexOf("<h2>デモ</h2>"));
+  assert(!before.includes("バッジ数"));
+  assert(!before.includes("<h2>状態</h2>"));
+});
+
 Deno.test("GET /sw.js serves the worker with a root scope", async () => {
   const res = await router.fetch(new Request("http://x/sw.js"));
   assertEquals(res.status, 200);
