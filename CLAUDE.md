@@ -143,6 +143,15 @@ Deno で catch 不能なエラーになる)。env は top-level await
     `cop()` を入れてある。`Sec-Fetch-Site` / `Origin` で、クロスオリジンの
     ブラウザからの unsafe メソッド（`POST /api/notify` など）を token 無しで
     拒否する。別オリジンから API を叩く構成にするなら `trustedOrigins` を足す。
+  - `router.tsx` に `@remix-run/csp-middleware` の `csp()` を入れてある
+    （`web/server/csp.ts`）。リクエストごとの nonce を使う strict CSP
+    （`script-src 'nonce-…' 'strict-dynamic'`、`object-src 'none'`、
+    `base-uri 'none'`）。`render()` が生成するタグには自動で付き、自分で書く
+    `<script>` / `<link rel="modulepreload">` には `nonceOf(context)` を
+    `Layout` の `nonce` に渡して付ける。ヘッダが付くのはライブの
+    router（`deno
+    serve`）だけで、静的に書き出したページ（Pages / Workers
+    static assets）には CSP が付かない。
   - DPoP セッションの保存先は `TURSO_DATABASE_URL` があれば Turso、無ければ
     メモリ (isolate ごとなので本番では Turso を設定する)。
 - **GitHub Pages**: `.github/workflows/pages.yml` が `deno task build`

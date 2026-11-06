@@ -23,6 +23,7 @@ import { markdownToHast } from "@kuboon/md";
 import { hastToElement } from "@kuboon/md/hast_to_element.ts";
 import { extract } from "@std/front-matter/yaml";
 
+import { nonceOf } from "../csp.ts";
 import { ogImage } from "../og/mod.ts";
 import { clientRuntime } from "../runtime.ts";
 import { Layout } from "../../client/layout.tsx";
@@ -161,6 +162,7 @@ export const blogController = createController(routes.blog, {
     index: async (context) => (
       context.render(
         <Layout
+          nonce={nonceOf(context)}
           title={Index.title}
           description={Index.description}
           image={indexImage}
@@ -187,6 +189,7 @@ export const blogController = createController(routes.blog, {
 
       return context.render(
         <Layout
+          nonce={nonceOf(context)}
           title={`${article.title} — Remix3 on Deno Template`}
           description={article.summary}
           image={articleImages.get(article.slug) ?? null}

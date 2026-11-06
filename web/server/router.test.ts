@@ -112,3 +112,40 @@ Deno.test("GET /spa/unknown is a 404", async () => {
   assertEquals(res.status, 404);
   await res.body?.cancel();
 });
+
+Deno.test("HTML responses carry a nonce-based CSP, and every executable tag has the nonce", async () => {
+  for (const path of ["/", "/hydration", "/my", "/spa/1"]) {
+    const res = await router.fetch(new Request(`http://x${path}`));
+    const policy = res.headers.get("content-security-policy") ?? "";
+    const nonce = policy.match(/'nonce-([^']+)'/)?.[1];
+    assert(nonce, `${path}: no nonce in ${JSON.stringify(policy)}`);
+    assertStringIncludes(policy, "'strict-dynamic'");
+    assertStringIncludes(policy, "object-src 'none'");
+
+    const html = await res.text();
+    const executable = [
+      ...html.matchAll(/<script\b[^>]*>|<link\b[^>]*modulepreload[^>]*>/g),
+    ]
+      .map((m) => m[0])
+      // A JSON data block is not executed, so CSP does not apply to it.
+      .filter((tag) => !tag.includes('type="application/json"'));
+    assert(executable.length > 0, `${path}: no script tags`);
+    for (const tag of executable) {
+      assertStringIncludes(tag, `nonce="${nonce}"`, `${path}: ${tag}`);
+    }
+  }
+});
+
+Deno.test("each request gets a fresh nonce", async () => {
+  const nonceOf = async () =>
+    (await router.fetch(new Request("http://x/"))).headers
+      .get("content-security-policy")?.match(/'nonce-([^']+)'/)?.[1];
+  const [a, b] = [await nonceOf(), await nonceOf()];
+  assert(a && b && a !== b);
+});
+
+Deno.test("non-HTML responses carry no CSP", async () => {
+  const res = await router.fetch(new Request("http://x/sw.js"));
+  assertEquals(res.headers.get("content-security-policy"), null);
+  await res.body?.cancel();
+});
