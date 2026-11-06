@@ -30,6 +30,7 @@ import { stripBase } from "@remix-kbn/ssg/base";
 import type { FileServerBehavior } from "@remix-kbn/ssg/site";
 
 import { assets, assetsPath } from "./assets.ts";
+import { contentSecurityPolicy, nonceOf } from "./csp.ts";
 // [feature:spa] `spaRuntime`
 import { clientRuntime, spaRuntime } from "./runtime.ts";
 import { ogImage, ogPaths, serveOgImage } from "./og/mod.ts";
@@ -71,6 +72,7 @@ function pageAction(route: { href(): string }, page: PageModule) {
   return (context: AppContext): Response =>
     context.render(
       <Layout
+        nonce={nonceOf(context)}
         title={page.title}
         description={page.description}
         image={image}
@@ -102,10 +104,12 @@ const serviceWorker = await Deno.readTextFile(
 
 /**
  * `cop()` rejects unsafe cross-origin browser requests (`POST /api/notify`, the protected API) by
- * `Sec-Fetch-Site` / `Origin`, without tokens. `render({ assets })` puts `context.render(node)` on
- * every request.
+ * `Sec-Fetch-Site` / `Origin`, without tokens. `contentSecurityPolicy` is the CSP (`csp.ts`). `render({ assets })`
+ * puts `context.render(node)` on every request.
  */
-const router = createRouter({ middleware: [cop(), render({ assets })] });
+const router = createRouter({
+  middleware: [cop(), contentSecurityPolicy, render({ assets })],
+});
 
 /** The request context those middlewares produce — `context.render`, in practice. */
 export type AppContext = RouterContext<typeof router>;
@@ -131,6 +135,7 @@ const top = createController(routes, {
     showcase: (context) =>
       context.render(
         <Layout
+          nonce={nonceOf(context)}
           title={Showcase.title}
           description={Showcase.description}
           image={showcaseImage}
@@ -189,6 +194,7 @@ const spa = createController(routes.spa, {
 
       return context.render(
         <Layout
+          nonce={nonceOf(context)}
           title={Spa.titleFor(id)}
           description={Spa.description}
           image={spaImages.get(id) ?? null}

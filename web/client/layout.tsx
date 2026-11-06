@@ -87,6 +87,13 @@ export interface LayoutProps {
    */
   script: ClientRuntime | null;
   /**
+   * The request's CSP nonce, from `getCspNonce(context)` — see `csp()` in `server/router.tsx`.
+   *
+   * Goes on the tags this shell authors itself (the runtime `<script>` and its module preloads);
+   * `render()` stamps the ones it generates. Absent for a render with no `csp()` in front of it.
+   */
+  nonce?: string;
+  /**
    * Render the shell's links as document navigations — see {@link ShellProps.documentLinks}.
    *
    * [feature:spa] delete this prop with the feature — see TEMPLATE.md.
@@ -190,7 +197,12 @@ export function Layout(handle: Handle<LayoutProps>) {
             href={`${base}/static/favicon.svg`}
           />
           {(props.script?.preloads ?? []).map((href) => (
-            <link key={href} rel="modulepreload" href={href} />
+            <link
+              key={href}
+              rel="modulepreload"
+              href={href}
+              nonce={props.nonce}
+            />
           ))}
         </head>
         <body>
@@ -203,7 +215,14 @@ export function Layout(handle: Handle<LayoutProps>) {
             </Shell>
           )}
           {props.script
-            ? <script type="module" src={props.script.src}></script>
+            ? (
+              <script
+                type="module"
+                src={props.script.src}
+                nonce={props.nonce}
+              >
+              </script>
+            )
             : null}
         </body>
       </html>

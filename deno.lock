@@ -30,14 +30,16 @@
     "npm:@cloudflare/config@0.25.0": "0.25.0",
     "npm:@libsql/client@~0.17.4": "0.17.4",
     "npm:@lightpanda/browser@^1.6.0": "1.6.0",
-    "npm:@remix-run/component@^1.1.0": "1.1.0",
+    "npm:@remix-run/component@^1.2.0": "1.2.0",
     "npm:@remix-run/cop-middleware@1": "1.0.0",
+    "npm:@remix-run/csp-middleware@1": "1.0.0",
     "npm:@remix-run/data-table@1": "1.0.0",
     "npm:@remix-run/fetch-router@1": "1.0.0",
-    "npm:@remix-run/render-middleware@^1.0.1": "1.0.1_@emnapi+core@1.11.2_@emnapi+runtime@1.11.3",
-    "npm:@remix-run/session@1": "1.0.0",
-    "npm:@remix-run/spa@^1.0.1": "1.0.1_@emnapi+core@1.11.2_@emnapi+runtime@1.11.3",
-    "npm:@remix-run/ui@0.13": "0.13.0",
+    "npm:@remix-run/render-middleware@^1.1.0": "1.1.0_@emnapi+core@1.11.2_@emnapi+runtime@1.11.3",
+    "npm:@remix-run/session@1": "1.0.1",
+    "npm:@remix-run/session@^1.0.1": "1.0.1",
+    "npm:@remix-run/spa@^1.0.2": "1.0.2_@emnapi+core@1.11.2_@emnapi+runtime@1.11.3",
+    "npm:@remix-run/ui@~0.13.1": "0.13.1",
     "npm:@types/hast@^3.0.5": "3.0.5",
     "npm:@types/mdast@^4.0.4": "4.0.4",
     "npm:beautiful-mermaid@^1.1.3": "1.1.3",
@@ -770,15 +772,16 @@
       ],
       "bin": true
     },
-    "@napi-rs/wasm-runtime@1.2.5_@emnapi+core@1.11.2_@emnapi+runtime@1.11.2": {
-      "integrity": "sha512-HshSvXzmBxNzqejd3k/KemgQ3hdREUYFRRrgxOZ+gPljDIsO2SDZrVZMd4Z/HsxudQbE62OVyVFE8z9BCurfjA==",
+    "@napi-rs/wasm-runtime@1.2.7_@emnapi+core@1.11.2_@emnapi+runtime@1.11.2": {
+      "integrity": "sha512-zJccwplOAbgfZju95IUHazLnx9RAPtPN2YGJXI6UbrgeaR9QfPjGrQL6ERkSAtnVCA4Q+83ApGyaX5zdpCaKkQ==",
       "dependencies": [
         "@emnapi/core",
+        "@emnapi/runtime@1.11.2",
         "@tybys/wasm-util"
       ]
     },
-    "@napi-rs/wasm-runtime@1.2.5_@emnapi+core@1.11.2_@emnapi+runtime@1.11.3": {
-      "integrity": "sha512-HshSvXzmBxNzqejd3k/KemgQ3hdREUYFRRrgxOZ+gPljDIsO2SDZrVZMd4Z/HsxudQbE62OVyVFE8z9BCurfjA==",
+    "@napi-rs/wasm-runtime@1.2.7_@emnapi+core@1.11.2_@emnapi+runtime@1.11.3": {
+      "integrity": "sha512-zJccwplOAbgfZju95IUHazLnx9RAPtPN2YGJXI6UbrgeaR9QfPjGrQL6ERkSAtnVCA4Q+83ApGyaX5zdpCaKkQ==",
       "dependencies": [
         "@emnapi/core",
         "@emnapi/runtime@1.11.3",
@@ -871,7 +874,7 @@
     "@oxc-minify/binding-wasm32-wasi@0.121.0_@emnapi+core@1.11.2_@emnapi+runtime@1.11.3": {
       "integrity": "sha512-1XDHPrAJa6W8dGqaDnlt+0k5In5JzGE0EOI87cJnOkSGsUAb1Sk8mKNhUe3/PuGiBDDat8eZ0wlq/VcUeOmsoA==",
       "dependencies": [
-        "@napi-rs/wasm-runtime@1.2.5_@emnapi+core@1.11.2_@emnapi+runtime@1.11.3"
+        "@napi-rs/wasm-runtime@1.2.7_@emnapi+core@1.11.2_@emnapi+runtime@1.11.3"
       ],
       "cpu": ["wasm32"]
     },
@@ -973,7 +976,7 @@
     "@oxc-parser/binding-wasm32-wasi@0.121.0_@emnapi+core@1.11.2_@emnapi+runtime@1.11.3": {
       "integrity": "sha512-5TFISkPTymKvsmIlKasPVTPuWxzCcrT8pM+p77+mtQbIZDd1UC8zww4CJcRI46kolmgrEX6QpKO8AvWMVZ+ifw==",
       "dependencies": [
-        "@napi-rs/wasm-runtime@1.2.5_@emnapi+core@1.11.2_@emnapi+runtime@1.11.3"
+        "@napi-rs/wasm-runtime@1.2.7_@emnapi+core@1.11.2_@emnapi+runtime@1.11.3"
       ],
       "cpu": ["wasm32"]
     },
@@ -1083,7 +1086,7 @@
       "dependencies": [
         "@emnapi/core",
         "@emnapi/runtime@1.11.2",
-        "@napi-rs/wasm-runtime@1.2.5_@emnapi+core@1.11.2_@emnapi+runtime@1.11.2"
+        "@napi-rs/wasm-runtime@1.2.7_@emnapi+core@1.11.2_@emnapi+runtime@1.11.2"
       ],
       "cpu": ["wasm32"]
     },
@@ -1180,7 +1183,7 @@
     "@oxc-transform/binding-wasm32-wasi@0.121.0_@emnapi+core@1.11.2_@emnapi+runtime@1.11.3": {
       "integrity": "sha512-7lj6FBMX8zLfTqIY4YHHTE/b6oyCzZaUwqi2n9KX4FkgjtBpfmq5KSUgi/I+YiE7JJHu1g8Bd3uWJq1lbehL8Q==",
       "dependencies": [
-        "@napi-rs/wasm-runtime@1.2.5_@emnapi+core@1.11.2_@emnapi+runtime@1.11.3"
+        "@napi-rs/wasm-runtime@1.2.7_@emnapi+core@1.11.2_@emnapi+runtime@1.11.3"
       ],
       "cpu": ["wasm32"]
     },
@@ -1230,8 +1233,8 @@
       ],
       "bin": true
     },
-    "@remix-run/assets@1.0.1_@emnapi+core@1.11.2_@emnapi+runtime@1.11.3": {
-      "integrity": "sha512-Dt5vjD8FgQRhCfwqCS1ivWVIsR39QQXDseqBIbWDyfvNk39cHG99vImKERZmbHfT2wgO0yOX7Kq7qpZhso9tYg==",
+    "@remix-run/assets@1.0.2_@emnapi+core@1.11.2_@emnapi+runtime@1.11.3": {
+      "integrity": "sha512-qBHzA/yid/4KJRVMcEol5OEoonPWE2JGIpD0V8NYpq9LzvyNLpRS2l7I6vPhwMAeotgOr/Iw8cnH5rBYOG+7Pg==",
       "dependencies": [
         "@oxc-project/runtime",
         "@remix-run/file-storage",
@@ -1250,8 +1253,8 @@
         "source-map-js"
       ]
     },
-    "@remix-run/component@1.1.0": {
-      "integrity": "sha512-FHcYTeDGiIS3s5gyymEvUKfRDtyYkY5Wt/uXr3+kPRK6tbqbD9gD2979f3TlStbi2drwdUAnyuA8CS23JRFlXQ==",
+    "@remix-run/component@1.2.0": {
+      "integrity": "sha512-LyPmhklZc9HQkzPYJH82vHSAq3OKC1fGmNwjS+qMYehdc7Dh0qPWI/3+H3x/J068hZ2WoV1fREGQvXcA16TTMA==",
       "dependencies": [
         "@types/dom-navigation"
       ]
@@ -1260,6 +1263,13 @@
       "integrity": "sha512-yM+iAFg218cS1zLTwoPRUdxSqxmN27pexxg6z0eNRcTFXUcyrVe9lhbaYUGUuI316wGCoh1eiTGuUjkDDbv3qw==",
       "dependencies": [
         "@remix-run/fetch-router"
+      ]
+    },
+    "@remix-run/csp-middleware@1.0.0": {
+      "integrity": "sha512-FV44lqHmAeLtlXQQr6/nQFhiLr9EBbk6Rqx6Q0njJtABg+TX2h4y0DSmcEuUbHmQo/KUJEDhMSpBOtSDBUH4aw==",
+      "dependencies": [
+        "@remix-run/fetch-router",
+        "@remix-run/headers"
       ]
     },
     "@remix-run/data-table@1.0.0": {
@@ -1271,8 +1281,8 @@
         "@remix-run/route-pattern"
       ]
     },
-    "@remix-run/file-storage@1.0.0": {
-      "integrity": "sha512-nfPAMxK40VNpx9vZFP4fMqwrEVanxEDsRCSYr41+3CtNF1kWzYETzCP/+xZ6uG/OtxiIn92S2pTkHvpr5UFyMw==",
+    "@remix-run/file-storage@1.0.1": {
+      "integrity": "sha512-Jj8/7UqYBl60jkxJehsYXA70gS8nmQlaA0SX36MzS/9tXTs/tSe6VPjCdZBewISkBZaPUg9DzyRitF2C+wUwSA==",
       "dependencies": [
         "@remix-run/fs",
         "@remix-run/lazy-file"
@@ -1285,8 +1295,8 @@
         "@remix-run/mime"
       ]
     },
-    "@remix-run/headers@1.0.1": {
-      "integrity": "sha512-C1iaFscxEcAVZl4g6u46aZqEvLUWrUaG2jliTgNW0wlqZRVemsTw7msOQ1UDBmhiqa4LzPK/l+7ynYHYUIxzaA=="
+    "@remix-run/headers@1.1.0": {
+      "integrity": "sha512-Rmzn+WesET0EfVukEHYYKT6RV9HYQb9WGdda3oWedQJXCoHnrXgaQc39DdwZ2rztI05izBAOF1HEHmEpGtjKHQ=="
     },
     "@remix-run/html-template@1.0.0": {
       "integrity": "sha512-XX2VgVMf4d8Mk3bvcDkHqHQEfXLjny8SE5QApXaTbc7F2BpuQbtTVji2d8Aqlo7U4V5ZGOPZqdbGhwjI2Iknqw=="
@@ -1300,17 +1310,18 @@
     "@remix-run/mime@1.0.0": {
       "integrity": "sha512-oOPL/TMsNIbfNpSzjtZhTmIeqfgCYM3mQOYs13UsHKTmgLRgKfiNz4B1q/SN3juhCrtPwDwjwUEx1Vn8vp9SEg=="
     },
-    "@remix-run/render-middleware@1.0.1_@emnapi+core@1.11.2_@emnapi+runtime@1.11.3": {
-      "integrity": "sha512-PHEsmNMCp+UNpaYIWn5rrJMvzEi28gwEuoMm+3rgC9EZnH7GMwqFDjj+fbMV4iVNJ6xk6+SiYR860ro+xPbCNA==",
+    "@remix-run/render-middleware@1.1.0_@emnapi+core@1.11.2_@emnapi+runtime@1.11.3": {
+      "integrity": "sha512-A+/brZUXobXMtTqSsMC8DDML9cprrhsPKsdH5fzq3cmbpilb38qWwO30lSnepglj06aS+DuG6pAGlGCaJ1tbRA==",
       "dependencies": [
         "@remix-run/assets",
         "@remix-run/component",
+        "@remix-run/csp-middleware",
         "@remix-run/fetch-router",
         "@remix-run/response"
       ]
     },
-    "@remix-run/response@1.0.1": {
-      "integrity": "sha512-AJjNC6GqSY/VTVXBnRryMqYcAWINBDoJv4zIO6sQas0s4BvMSznYK9nWV11z0SSn7OBkitzJDAKvcJywRd9RYg==",
+    "@remix-run/response@1.0.2": {
+      "integrity": "sha512-H2lThUxjV8+Ai0rdzEgctIVZDm9lGhp+HG3xvP2Og4GA+CZPsoBaCOctCRBxDLOTxW8enkB9/JONraYpmPMuhw==",
       "dependencies": [
         "@remix-run/headers",
         "@remix-run/html-template",
@@ -1320,19 +1331,19 @@
     "@remix-run/route-pattern@1.0.0": {
       "integrity": "sha512-EsI8J5AcDpnV76lGcpwPCqCN1Vj7X2eNPqgUr+RjInTsm4iTnrGzn0iIUxpUjQ5/Ba1cAd8CMMbsA2bjEjZiyQ=="
     },
-    "@remix-run/session@1.0.0": {
-      "integrity": "sha512-SS8V9KWt72OmHt5BeEHpUMi+RXzUmTDbQyieG7+zk9Kxsw3GFfJicoBkOFwOQNvJ13LiX24kXjh3JHS7Gvb/mA=="
+    "@remix-run/session@1.0.1": {
+      "integrity": "sha512-EA3jOeD1nuUagYGbh4XT30QrUgszVnPyny0Lj0XiZB1r2HTM1H8nNLy7NymeMwYUJGkxuiALQgDium9DaxygQg=="
     },
-    "@remix-run/spa@1.0.1_@emnapi+core@1.11.2_@emnapi+runtime@1.11.3": {
-      "integrity": "sha512-zGg3f6zRkyG8mJg2vrkULKi+zqL/3tIiA3FNuakpxLzxMZVaCc1+iFqgfwk638lIWk1doIqDp3+G6IneU96tcw==",
+    "@remix-run/spa@1.0.2_@emnapi+core@1.11.2_@emnapi+runtime@1.11.3": {
+      "integrity": "sha512-Idwb8tY33brdYl2IAPw1IBSIgfmUZyslYmKv3jr+dkJKgj+1n2SdsqdhVDCxe9q+XXKhdrf2lQcIpWVvaQqn0Q==",
       "dependencies": [
         "@remix-run/component",
         "@remix-run/fetch-router",
         "@remix-run/render-middleware"
       ]
     },
-    "@remix-run/ui@0.13.0": {
-      "integrity": "sha512-8N47y0CPtinGTnA6pbCoT51BJpRjkKqBkHd6MYBlhrtWCrX/bKe5VNktt4oyGF0vOecyvbgI6odkem83lt4Isg==",
+    "@remix-run/ui@0.13.1": {
+      "integrity": "sha512-FbjoQqz20HqWAxLvacKu/a1437At0Ul468wN9uANTm6ae8HdneM3QsbPLg3mjPq/xX4tz1GHjQS1BMwe5rI9DA==",
       "dependencies": [
         "@remix-run/component"
       ]
@@ -3211,14 +3222,15 @@
       "npm:@cloudflare/config@0.25.0",
       "npm:@libsql/client@~0.17.4",
       "npm:@lightpanda/browser@^1.6.0",
-      "npm:@remix-run/component@^1.1.0",
+      "npm:@remix-run/component@^1.2.0",
       "npm:@remix-run/cop-middleware@1",
+      "npm:@remix-run/csp-middleware@1",
       "npm:@remix-run/data-table@1",
       "npm:@remix-run/fetch-router@1",
-      "npm:@remix-run/render-middleware@^1.0.1",
-      "npm:@remix-run/session@1",
-      "npm:@remix-run/spa@^1.0.1",
-      "npm:@remix-run/ui@0.13",
+      "npm:@remix-run/render-middleware@^1.1.0",
+      "npm:@remix-run/session@^1.0.1",
+      "npm:@remix-run/spa@^1.0.2",
+      "npm:@remix-run/ui@~0.13.1",
       "npm:canvaskit-wasm@0.40",
       "npm:cf@1.0.0-beta.16",
       "npm:puppeteer-core@^23.11.1"
