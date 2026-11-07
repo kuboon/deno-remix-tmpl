@@ -14,6 +14,10 @@
     "cf": "deno run -A npm:cf",
     "test": "deno test -P --ignore=web/tests",
     "test:browser": "deno task --cwd web/tests test",
+    "lightpanda:install": {
+      "description": "Download the lightpanda binary used by test:browser (a pinned release, not nightly)",
+      "command": "deno run -A npm:@lightpanda/browser install 1.0.3"
+    },
     "check": "deno task --cwd web/client check && deno task --cwd web/server check && deno check packages && deno lint && deno fmt --check"
   },
   "permissions": {
