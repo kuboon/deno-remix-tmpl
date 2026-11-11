@@ -111,7 +111,8 @@ export interface DpopSessionMiddlewareOptions {
   clockSkewSeconds?: number;
   /**
    * Build the response returned when DPoP verification fails. Defaults to a
-   * 401 with `{ error }` JSON.
+   * 401 with an RFC 9457 problem (`application/problem+json`, the error as
+   * `detail`) and a `WWW-Authenticate: DPoP` challenge.
    */
   onError?: (error: string, request: Request) => Response | Promise<Response>;
 }
@@ -184,9 +185,28 @@ export function dpopSession(
   };
 }
 
+/**
+ * The default failure response: a 401 whose body is an RFC 9457 problem
+ * (`application/problem+json`) with the verification error as `detail`, and a
+ * `WWW-Authenticate: DPoP` challenge carrying `error="invalid_dpop_proof"`
+ * (RFC 9449 §7.1).
+ */
 function defaultOnError(error: string, _request: Request): Response {
-  return new Response(JSON.stringify({ error }), {
-    status: 401,
-    headers: { "Content-Type": "application/json" },
-  });
+  const description = error.replace(/["\\]/g, "");
+  return new Response(
+    JSON.stringify({
+      type: "about:blank",
+      title: "Unauthorized",
+      status: 401,
+      detail: error,
+    }),
+    {
+      status: 401,
+      headers: {
+        "Content-Type": "application/problem+json",
+        "WWW-Authenticate":
+          `DPoP error="invalid_dpop_proof", error_description="${description}"`,
+      },
+    },
+  );
 }

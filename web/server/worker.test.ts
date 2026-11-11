@@ -1,7 +1,18 @@
-import { assert, assertEquals } from "@std/assert";
+import { assertEquals } from "@std/assert";
 import worker from "./worker.ts";
 
 const get = (path: string) => worker.fetch(new Request(`http://x${path}`));
+
+/** Every error the Worker answers with is an RFC 9457 problem. */
+async function assertProblem(res: Response, status: number) {
+  assertEquals(res.status, status);
+  assertEquals(res.headers.get("content-type"), "application/problem+json");
+  const body = await res.json() as Record<string, unknown>;
+  assertEquals(body.status, status);
+  assertEquals(body.type, "about:blank");
+  assertEquals(typeof body.title, "string");
+  return body;
+}
 
 Deno.test("worker serves the RP JWKS", async () => {
   const res = await get("/.well-known/jwks.json");
@@ -11,21 +22,16 @@ Deno.test("worker serves the RP JWKS", async () => {
 });
 
 Deno.test("worker /api/turso degrades to 503 without Turso env", async () => {
-  const res = await get("/api/turso");
-  assertEquals(res.status, 503);
-  await res.body?.cancel();
+  const body = await assertProblem(await get("/api/turso"), 503);
+  assertEquals(body.configured, false);
 });
 
 Deno.test("worker /api/protected rejects a request without a DPoP proof", async () => {
-  const res = await get("/api/protected");
-  assert(res.status === 400 || res.status === 401, `got ${res.status}`);
-  await res.body?.cancel();
+  await assertProblem(await get("/api/protected"), 401);
 });
 
 Deno.test("worker does not render pages (static assets answer those)", async () => {
-  const res = await get("/hydration");
-  assertEquals(res.status, 404);
-  await res.body?.cancel();
+  await assertProblem(await get("/hydration"), 404);
 });
 
 const post = (headers: Record<string, string>) =>
@@ -43,15 +49,14 @@ Deno.test("worker rejects a cross-origin browser POST (cop)", async () => {
     { origin: "http://evil.example" },
   ];
   for (const headers of cases) {
-    const res = await post(headers);
-    assertEquals(res.status, 403);
-    await res.body?.cancel();
+    const body = await assertProblem(await post(headers), 403);
+    assertEquals(typeof body.reason, "string");
   }
 });
 
 Deno.test("worker lets a same-origin POST through to the action", async () => {
   const res = await post({ "sec-fetch-site": "same-origin" });
   // The empty body is the action's own 400, not cop's 403.
-  assertEquals(res.status, 400);
-  await res.body?.cancel();
+  const body = await assertProblem(res, 400);
+  assertEquals(typeof body.detail, "string");
 });

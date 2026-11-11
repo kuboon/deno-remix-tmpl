@@ -17,12 +17,17 @@ import { apiController } from "./controllers/api/controller.ts"; // [feature:pro
 import { notifyAction } from "./controllers/api/notify.ts"; // [feature:server-send]
 import { tursoAction } from "./controllers/api/turso.ts"; // [feature:turso]
 import { jwksAction } from "./controllers/well_known.ts"; // [feature:server-send]
+import { copDenied, problem } from "./lib/problem.ts";
 
 // `router.tsx` augments `RouterTypes` project-wide so every controller sees `context.render`. None
 // of the API controllers use it, and this router has no render middleware, so the controllers are
 // handed over as `never` rather than pulling the page renderer (and `Deno.bundle`) in.
 // Rejects unsafe cross-origin browser requests (`POST /api/notify`, the protected API).
-const router = createRouter({ middleware: [cop()] });
+// Errors are RFC 9457 problems (`lib/problem.ts`), the cop rejection and the 404 included.
+const router = createRouter({
+  middleware: [cop({ onDeny: copDenied })],
+  defaultHandler: () => problem({ status: 404 }),
+});
 
 router.get(routes.jwks, jwksAction.handler as never);
 

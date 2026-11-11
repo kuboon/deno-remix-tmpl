@@ -52,6 +52,7 @@ import { apiController } from "./controllers/api/controller.ts";
 import { notifyAction } from "./controllers/api/notify.ts";
 import { tursoAction } from "./controllers/api/turso.ts";
 import { jwksAction } from "./controllers/well_known.ts";
+import { copDenied } from "./lib/problem.ts";
 
 /** Deploy path prefix. The build strips it back off when writing, so output lands at the root. */
 export { base };
@@ -104,11 +105,15 @@ const serviceWorker = await Deno.readTextFile(
 
 /**
  * `cop()` rejects unsafe cross-origin browser requests (`POST /api/notify`, the protected API) by
- * `Sec-Fetch-Site` / `Origin`, without tokens. `contentSecurityPolicy` is the CSP (`csp.ts`). `render({ assets })`
+ * `Sec-Fetch-Site` / `Origin`, without tokens, answering with an RFC 9457 problem (`lib/problem.ts`). `contentSecurityPolicy` is the CSP (`csp.ts`). `render({ assets })`
  * puts `context.render(node)` on every request.
  */
 const router = createRouter({
-  middleware: [cop(), contentSecurityPolicy, render({ assets })],
+  middleware: [
+    cop({ onDeny: copDenied }),
+    contentSecurityPolicy,
+    render({ assets }),
+  ],
 });
 
 /** The request context those middlewares produce — `context.render`, in practice. */
