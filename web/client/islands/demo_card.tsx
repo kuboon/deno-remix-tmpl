@@ -90,12 +90,16 @@ export const DemoCard = clientEntry(
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ userIds: [userId], notification }),
         });
+        // Errors are RFC 9457 problems (`application/problem+json`): `detail` says what went wrong.
         const data = await r.json().catch(() => ({})) as {
-          message?: string;
+          detail?: string;
+          title?: string;
           results?: { ok?: boolean }[];
         };
         if (!r.ok) {
-          throw new Error(data.message ?? `送信に失敗しました (${r.status})`);
+          throw new Error(
+            data.detail ?? data.title ?? `送信に失敗しました (${r.status})`,
+          );
         }
         const results = Array.isArray(data.results) ? data.results : [];
         const delivered = results.filter((x) => x?.ok).length;

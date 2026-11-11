@@ -110,6 +110,24 @@ Deno で catch 不能なエラーになる)。env は top-level await
 - `TURSO_DATABASE_URL` / `TURSO_AUTH_TOKEN` — `GET /api/turso` サンプル用の
   Turso (libSQL) 接続。未設定なら 503 を返すのみ。
 
+## API のエラー応答 (RFC 9457)
+
+`/api/*` のエラーは [RFC 9457] の Problem Details
+（`application/problem+json`）で返す。`web/server/lib/problem.ts` の
+`problem({ status, detail, ... })` を使う（`type` は既定で `about:blank`、
+`title` は既定でステータスの説明句、それ以外のキーは拡張メンバー）。
+
+- 両 router の `cop()` は `onDeny: copDenied` で 403 を problem にする。Worker
+  の `defaultHandler` は 404 を problem で返す。
+- DPoP middleware（`packages/remix-dpop-session-middleware`）の既定の 401 も
+  problem で、`WWW-Authenticate: DPoP error="invalid_dpop_proof"` を付ける （RFC
+  9449 §7.1）。
+- クライアントは `detail` を人向けのメッセージとして読む。
+- API を足すときもエラーは `problem()` で返し、`{ message }`
+  などの独自形にしない。
+
+[RFC 9457]: https://www.rfc-editor.org/rfc/rfc9457
+
 ## Turso (libSQL) + data-table サンプル
 
 `GET /api/turso` が `@remix-run/data-table` のリレーショナル API で Turso に

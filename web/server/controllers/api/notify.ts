@@ -16,9 +16,10 @@ import {
   type PushNotificationContent,
   sendRpNotification,
 } from "../../lib/push/client.ts";
+import { problem } from "../../lib/problem.ts";
 
-const badRequest = (message: string): Response =>
-  Response.json({ message }, { status: 400 });
+const badRequest = (detail: string): Response =>
+  problem({ status: 400, detail });
 
 const parseNotification = (
   value: unknown,
@@ -69,14 +70,12 @@ export const notifyAction = {
       const results = await sendRpNotification({ userIds, notification });
       return Response.json({ results });
     } catch (error) {
-      return Response.json(
-        {
-          message: error instanceof Error
-            ? error.message
-            : "Failed to send notification",
-        },
-        { status: 502 },
-      );
+      return problem({
+        status: 502,
+        detail: error instanceof Error
+          ? error.message
+          : "Failed to send notification",
+      });
     }
   },
 } satisfies Action<typeof routes.api.notify>;

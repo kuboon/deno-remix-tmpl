@@ -69,7 +69,9 @@ Deno.test("GET /api/turso reports unconfigured without Turso env", async () => {
   // 503 instead of attempting a connection.
   const res = await router.fetch(new Request("http://x/api/turso"));
   assertEquals(res.status, 503);
-  const body = await res.json() as { configured?: boolean };
+  assertEquals(res.headers.get("content-type"), "application/problem+json");
+  const body = await res.json() as { configured?: boolean; status?: number };
+  assertEquals(body.status, 503);
   assertEquals(body.configured, false);
 });
 

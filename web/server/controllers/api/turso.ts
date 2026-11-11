@@ -9,17 +9,19 @@
 
 import type { Action } from "@remix-run/fetch-router";
 import type { routes } from "../../../client/routes.ts";
+import { problem } from "../../lib/problem.ts";
 import { getTursoDb, visits } from "../../lib/turso/db.ts";
 
 export const tursoAction = {
   async handler(): Promise<Response> {
     const turso = getTursoDb();
     if (!turso) {
-      return Response.json({
-        configured: false,
-        message:
+      return problem({
+        status: 503,
+        detail:
           "Turso is not configured. Set TURSO_DATABASE_URL (and TURSO_AUTH_TOKEN) to enable this sample.",
-      }, { status: 503 });
+        configured: false,
+      });
     }
 
     try {
@@ -34,9 +36,10 @@ export const tursoAction = {
 
       return Response.json({ configured: true, total, recent });
     } catch (error) {
-      return Response.json({
-        message: error instanceof Error ? error.message : "Turso query failed",
-      }, { status: 502 });
+      return problem({
+        status: 502,
+        detail: error instanceof Error ? error.message : "Turso query failed",
+      });
     }
   },
 } satisfies Action<typeof routes.api.turso>;

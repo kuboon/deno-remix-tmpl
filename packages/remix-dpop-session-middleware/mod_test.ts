@@ -100,6 +100,21 @@ Deno.test("DPoP ヘッダがない場合は 401 を返す", async () => {
   const { router } = newRouter();
   const response = await router.fetch("https://app/count");
   assertEquals(response.status, 401);
+  assertEquals(
+    response.headers.get("content-type"),
+    "application/problem+json",
+  );
+  assertEquals(
+    response.headers.get("www-authenticate")?.startsWith(
+      'DPoP error="invalid_dpop_proof"',
+    ),
+    true,
+  );
+  const body = await response.json();
+  assertEquals(body.type, "about:blank");
+  assertEquals(body.title, "Unauthorized");
+  assertEquals(body.status, 401);
+  assertEquals(typeof body.detail, "string");
 });
 
 Deno.test("不正な DPoP プルーフは 401 を返す", async () => {
