@@ -104,6 +104,9 @@ Deno で catch 不能なエラーになる)。env は top-level await
 - `RP_SIGNING_KEY_JWK` — 任意。ES256 秘密鍵 (JWK JSON)。未設定ならプロセス毎に
   生成
   (開発用)。本番では固定鍵を設定し、再起動で鍵がローテートしないようにする。
+  Cloudflare には `.github/workflows/rp-signing-key.yml`（手動実行）が鍵を作って
+  Worker の secret に入れる（再実行でローテート）。ローカルで作るなら
+  `deno task gen:signing-key`。
 - `BASE_URL` — 静的ビルド専用。Pages のサブパス（PR プレビュー等）を `base`
   にする。server（`deno serve` / Cloudflare）は常にルート配信なので読まない
   （`web/server/deno.json` の `dev` 権限で ignore）。

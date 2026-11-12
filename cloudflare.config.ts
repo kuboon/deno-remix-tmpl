@@ -25,7 +25,8 @@ export default defineConfig({
       IDP_ORIGIN: bindings.text("https://id.kbn.one"),
       RP_ORIGIN: bindings.text("https://deno-remix-tmpl.kuboon.workers.dev"),
       // Secrets, set once with `deno task cf workers secrets update <NAME> --worker deno-remix-tmpl
-      // --type secret_text --text ...`; declared here so a deploy keeps them.
+      // --type secret_text --text ...` (RP_SIGNING_KEY_JWK: run the `rp-signing-key` workflow,
+      // which generates it); declared here so a deploy keeps them.
       RP_SIGNING_KEY_JWK: bindings.secret(),
       TURSO_DATABASE_URL: bindings.text(
         "libsql://deno-remix-reference-kuboon.aws-ap-northeast-1.turso.io",
