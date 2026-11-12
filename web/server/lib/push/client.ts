@@ -52,8 +52,12 @@ export interface SendNotificationResult {
 }
 
 /** Build a single-use `private_key_jwt` client assertion for the IdP. */
-const buildClientAssertion = async (): Promise<string> => {
-  const { rpOrigin, idpOrigin } = getConfig();
+const buildClientAssertion = async (
+  fallbackOrigin?: string,
+): Promise<string> => {
+  const config = getConfig();
+  const rpOrigin = config.rpOrigin || fallbackOrigin;
+  const { idpOrigin } = config;
   if (!rpOrigin) {
     throw new Error(
       "RP_ORIGIN is not configured — set it to this app's public origin (a clientId whitelisted on the IdP).",
@@ -75,12 +79,18 @@ const buildClientAssertion = async (): Promise<string> => {
 /**
  * Send a notification to the given users via the IdP.
  *
+ * `options.origin` is the origin the request reached this app on. It stands in for `RP_ORIGIN`
+ * when that is unset, so a deploy needs no config for it: the app's public origin is where the
+ * IdP fetches `/.well-known/jwks.json` from anyway. Set `RP_ORIGIN` to pin one origin when the
+ * app answers on several (e.g. `*.workers.dev` and a custom domain).
+ *
  * @throws when the assertion can't be built or the IdP rejects the request.
  */
 export const sendRpNotification = async (
   input: SendNotificationInput,
+  options: { origin?: string } = {},
 ): Promise<SendNotificationResult[]> => {
-  const assertion = await buildClientAssertion();
+  const assertion = await buildClientAssertion(options.origin);
   const { idpOrigin } = getConfig();
   const res = await fetch(`${idpOrigin}/rp/notifications`, {
     method: "POST",

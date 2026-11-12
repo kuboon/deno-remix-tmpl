@@ -1,0 +1,45 @@
+name: rp-signing-key
+
+# Generates a fresh ES256 key and stores it as the Worker secret RP_SIGNING_KEY_JWK — the key the
+# RP signs its `private_key_jwt` client assertions with (`web/server/lib/signing-key.ts`). The
+# first deploy already creates one (`cloudflare.yml`, `web/server/cf_secrets.ts`); run this to
+# rotate it. The private JWK never reaches the log:
+# it is masked, and `deno task -q` keeps the task runner from echoing the command line.
+#
+# The Worker publishes the new public key at /.well-known/jwks.json as soon as the secret lands
+# (setting a secret deploys a new version), and the IdP picks it up by its new `kid`.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: rp-signing-key
+  cancel-in-progress: false
+
+jobs:
+  set-secret:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - name: Generate the key and store it as the Worker secret
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          # The Worker name lives in cloudflare.config.ts; read it rather than repeat it here.
+          worker=$(deno eval 'console.log((await import("./cloudflare.config.ts")).default.worker.name)')
+          jwk=$(deno task -q gen:signing-key)
+          echo "::add-mask::$(jq -r .d <<<"$jwk")"
+          echo "::add-mask::$jwk"
+          deno task -q cf workers secrets update RP_SIGNING_KEY_JWK \
+            --worker "$worker" --type secret_text --text "$jwk" > /dev/null
+          # The kid is public (it is in the JWKS); print it so the rotation can be checked.
+          kid=$(RP_SIGNING_KEY_JWK="$jwk" deno eval -c deno.json \
+            'const { getSigningKey } = await import("./web/server/lib/signing-key.ts"); console.log((await getSigningKey()).kid)')
+          echo "Set RP_SIGNING_KEY_JWK on Worker \`$worker\` (kid \`$kid\`)." >> "$GITHUB_STEP_SUMMARY"

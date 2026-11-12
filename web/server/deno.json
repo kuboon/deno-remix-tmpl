@@ -9,6 +9,10 @@
       "dependencies": ["build", "build:worker"],
       "command": "deno run -A cf_build.ts"
     },
+    "gen:signing-key": {
+      "description": "Print a fresh ES256 private JWK for RP_SIGNING_KEY_JWK",
+      "command": "deno run gen_signing_key.ts"
+    },
     "check": "deno check ."
   },
   "permissions": {

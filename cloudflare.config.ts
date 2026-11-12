@@ -21,16 +21,19 @@ export default defineConfig({
       // Only these reach the Worker; every other path is a static file.
       runWorkerFirst: ["/api/*", "/.well-known/jwks.json"],
     },
+    // Only what has no default. `IDP_ORIGIN` defaults to https://id.kbn.one and `RP_ORIGIN` to the
+    // origin a request arrives on (`web/server/config.ts`, `lib/push/client.ts`); add them here as
+    // `bindings.text(...)` to override.
     env: {
-      IDP_ORIGIN: bindings.text("https://id.kbn.one"),
-      RP_ORIGIN: bindings.text("https://deno-remix-tmpl.kuboon.workers.dev"),
-      // Secrets, set once with `deno task cf workers secrets update <NAME> --worker deno-remix-tmpl
-      // --type secret_text --text ...`; declared here so a deploy keeps them.
+      // [feature:server-send] Required, so a deploy without it fails rather than signing with a per-isolate key. The
+      // `cloudflare` workflow generates it on the first deploy (`web/server/cf_secrets.ts`), and
+      // the `rp-signing-key` workflow rotates it.
       RP_SIGNING_KEY_JWK: bindings.secret(),
+      // [feature:turso] TURSO_AUTH_TOKEN is not declared: the `cloudflare` workflow uploads it from
+      // the repo secret of the same name when that is set, and a deploy keeps existing secrets.
       TURSO_DATABASE_URL: bindings.text(
         "libsql://deno-remix-reference-kuboon.aws-ap-northeast-1.turso.io",
       ),
-      TURSO_AUTH_TOKEN: bindings.secret(),
     },
   },
 });
