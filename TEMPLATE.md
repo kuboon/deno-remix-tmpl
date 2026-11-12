@@ -90,23 +90,41 @@ Worker（`web/server/worker.ts`）で答える**。ページは SSG のまま
 
 **Cloudflare へのデプロイ**
 
-- `cloudflare.config.ts`: Worker 名、`compatibilityDate`、`runWorkerFirst`
-  （Worker に回すパス）、公開変数（`IDP_ORIGIN` /
-  `RP_ORIGIN`）を自分のアプリ用に
-  直す。秘密（`RP_SIGNING_KEY_JWK`、`TURSO_*`）は設定に書かず Worker の secret
-  に 置く。`RP_SIGNING_KEY_JWK` は初回デプロイ後に Actions の `rp-signing-key`
-  workflow を手動実行すれば作って入れてくれる（再実行でローテート）。
+初回に手でやるのは次の 3 つだけ。あとは main への push ごとに
+`.github/workflows/cloudflare.yml` がデプロイする（Worker が無ければ作られる）。
+
+1. `cloudflare.config.ts` の `accountId` と Worker
+   名（`worker.name`）を自分のものに 直す（`compatibilityDate` は必要なら）。
+2. repo secret に `CLOUDFLARE_API_TOKEN`（Workers を編集できる API
+   トークン）を置く。
+3. IdP の `AUTHORIZE_WHITELIST` に、デプロイ先の origin（例:
+   `https://<worker>.<subdomain>.workers.dev`）を登録する（`server-send`
+   を使うなら）。
+
+自動で済むもの:
+
+- `RP_SIGNING_KEY_JWK`: 初回デプロイで生成して Worker の secret に入れる
+  （`web/server/cf_secrets.ts`。既にあれば触らないので、デプロイで鍵は変わらない）。
+  ローテートは Actions の `rp-signing-key` を手動実行。
+- `RP_ORIGIN`: 未設定なら、リクエストが来た origin を使う。独自ドメインと
+  `workers.dev` の両方で受けるなど、origin を一つに固定したいときだけ
+  `cloudflare.config.ts` の `env` に `bindings.text(...)` で足す。
+- `IDP_ORIGIN`: 既定で `https://id.kbn.one`。別の IdP なら同じく `env` に足す。
+- Turso（`[feature:turso]`）: `cloudflare.config.ts` の `TURSO_DATABASE_URL`
+  を自分の DB にし、repo secret に `TURSO_AUTH_TOKEN` を置けばデプロイ時に
+  Worker の secret に入る。使わないなら機能ごと消す。
+
 - ビルド: `deno task build:cf`。`cf build` は使わない（Wrangler か Vite
   プラグインを呼ぶだけで、`jsr:` / `deno.json` の imports
   を解決できない）。代わりに `deno bundle` で `worker.ts` を
   `web/worker-dist/worker.js` にまとめ、 `web/server/cf_build.ts` が `web/dist`
   と合わせて Build Output Specification （`.cloudflare/output/v0`）を書く。
 - デプロイ:
-  `deno task cf deploy --prebuilt`（`.github/workflows/cloudflare.yml`。 repo
-  secret に `CLOUDFLARE_API_TOKEN`。アカウント ID は秘密ではないので
-  `cloudflare.config.ts` の `accountId` に書く）。`cf` は beta で Build Output
-  Specification は `v0`（草案）。上げるときは
-  `deno task cf deploy --prebuilt --dry-run` が通ることを確認する。
+  `deno task cf deploy --prebuilt --secrets-file …`（`.github/workflows/cloudflare.yml`。
+  アカウント ID は秘密ではないので `cloudflare.config.ts` の `accountId`
+  に書く）。`cf` は beta で Build Output Specification は
+  `v0`（草案）。上げるときは `deno task cf deploy --prebuilt --dry-run`
+  が通ることを確認する。
 - Worker が使うのは `web/server/worker.ts` から辿れるコードだけ。API を足したら
   `worker.ts` にも配線する（`router.tsx` だけに足すと Cloudflare に出ない）。
 - DPoP セッション（`middleware/dpop.ts`）は `TURSO_DATABASE_URL` があれば
@@ -118,8 +136,8 @@ Worker（`web/server/worker.ts`）で答える**。ページは SSG のまま
 - [ ] アプリ名: `CLAUDE.md` の見出し、`README.md`、`layout.tsx`
       のブランド名（`Remix3 on Deno Template`）、 `og/mod.ts` の `SITE_NAME`、各
       `pages/*.tsx` の `title`（`— Remix3 on Deno Template`）、`apm.yml`
-- [ ] `client/idp.ts` の `IDP_ORIGIN`（サインインを使うなら）。`RP_ORIGIN` は
-      IdP の `AUTHORIZE_WHITELIST` に登録が必要
+- [ ] `client/idp.ts` の `IDP_ORIGIN`（サインインを使うなら）。デプロイ先の
+      origin（`RP_ORIGIN`）は IdP の `AUTHORIZE_WHITELIST` に登録が必要
 - [ ] `<html lang>`（`layout.tsx`）。ページが日本語なら `ja`
 - [ ] `client/static/favicon.svg`、`tokens.ts` / `static/app.css` の配色
 - [ ] デモのリンク（`README.md`、`pages/index.tsx`）を自分のデプロイ先の URL に
@@ -143,20 +161,20 @@ Worker（`web/server/worker.ts`）で答える**。ページは SSG のまま
 `deno task check && deno task test`
 （server）が通ること。落ちるなら、消し残したものがリンクされている。
 
-| 機能             | 消すファイル                                                                                                                                                                               | 配線（編集箇所）                                                                                                                                                                                                                                      | 依存する機能                   |
-| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------ |
-| `hydration-demo` | `client/pages/hydration.tsx`、`client/islands/{counter,total,store}.ts(x)`、`web/tests/browser_hydration.test.ts`                                                                          | `routes.ts`、`router.tsx`、`layout.tsx` の nav                                                                                                                                                                                                        | —                              |
-| `blog`           | `client/pages/blog/`、`server/blog/`、`client/islands/share.tsx`                                                                                                                           | `routes.ts`、`router.tsx`（`blogController`）、`layout.tsx` の nav、`app.css` の share 規則、`theme.ts` の `proseStyle`、`deno.json` の `@kuboon/md` `@kuboon/share-element` `@std/front-matter`                                                      | —                              |
-| `showcase`       | `client/pages/showcase.tsx`、`client/islands/showcase/`、`server/versions.ts`                                                                                                              | `routes.ts`、`router.tsx`、`assets.ts` の `islands/showcase/*.tsx`、`layout.tsx` の nav、`deno.json` の `@remix-run/ui`、`router.test.ts` の `/showcase` 行                                                                                           | —                              |
-| `fullscreen`     | `client/pages/fullscreen.tsx`、`client/islands/fullscreen-game.tsx`                                                                                                                        | `routes.ts`、`router.tsx`、`layout.tsx` の nav、`PageModule` の `viewport`/`bare`                                                                                                                                                                     | —                              |
-| `spa`            | `client/pages/spa.tsx`、`client/spa/`                                                                                                                                                      | `routes.ts`、`router.tsx`（`spa` controller、`spaRuntime`）、`assets.ts` の `spa/entry.ts`、`runtime.ts`、`layout.tsx` の `documentLinks` と nav、`nav_auth.tsx` の `documentLinks`、`deno.json` の `@remix-run/spa`                                  | —                              |
-| `helper`         | `client/helper/`                                                                                                                                                                           | `assets.ts` の `helper/panel.ts`、`runtime.ts` の `helper`、`layout.tsx` の Help ボタンと `ClientRuntime.helper`、`hydration.ts` の `installHelper()`、`spa/entry.ts`、`router.tsx` の `entryPoints` 末尾、`deno.json` の `@remix-kbn/helper-agent/*` | —                              |
-| `signin`         | `client/islands/{nav_auth,signout_button}.tsx`、`client/session.ts`、`client/idp.ts`、`client/pages/my.tsx`                                                                                | `routes.ts` の `my`、`layout.tsx` の `<NavAuth>`、`router.tsx`、`deno.json` の `@kuboon/dpop`                                                                                                                                                         | `push` は signin に依存        |
-| `push`           | `client/islands/push_card.tsx`、`client/lib/push/`、`client/sw.js`                                                                                                                         | `router.tsx` の `/sw.js` ルートと `entryPoints`、`pages/my.tsx` の `<PushCard>`                                                                                                                                                                       | `signin`                       |
-| `demo-panel`     | `client/islands/demo_card.tsx`                                                                                                                                                             | `pages/my.tsx` の `<DemoCard>`                                                                                                                                                                                                                        | — (`server-send` の UI を含む) |
-| `server-send`    | `server/lib/push/`、`server/lib/signing-key*`、`server/gen_signing_key.ts`、`server/controllers/api/notify.ts`、`server/controllers/well_known.ts`、`.github/workflows/rp-signing-key.yml` | `routes.ts` の `jwks` と `api.notify`、`router.tsx`、`worker.ts`、`demo_card.tsx` の「サーバーから送信」、`server/config.ts` の `RP_*`、`deno.json` と `server/deno.json` の `gen:signing-key`                                                        | `push`、server モード          |
-| `turso`          | `server/lib/turso/`、`server/controllers/api/turso.ts`、`web/tests/turso_*`                                                                                                                | `routes.ts` の `api.turso`、`router.tsx`、`worker.ts`、`server/config.ts` の `TURSO_*`、`deno.json` の `@libsql/client` `@remix-run/data-table` `@remix-kbn/data-table-sqlite-turso`                                                                  | server モード                  |
-| `protected-api`  | `server/controllers/api/controller.ts`、`server/middleware/dpop.ts`、`packages/*`                                                                                                          | `routes.ts` の `api.protected`、`router.tsx`、`worker.ts`、`deno.json` の `@scope/*` と workspace                                                                                                                                                     | server モード                  |
+| 機能             | 消すファイル                                                                                                                                                                               | 配線（編集箇所）                                                                                                                                                                                                                                                                                       | 依存する機能                   |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------ |
+| `hydration-demo` | `client/pages/hydration.tsx`、`client/islands/{counter,total,store}.ts(x)`、`web/tests/browser_hydration.test.ts`                                                                          | `routes.ts`、`router.tsx`、`layout.tsx` の nav                                                                                                                                                                                                                                                         | —                              |
+| `blog`           | `client/pages/blog/`、`server/blog/`、`client/islands/share.tsx`                                                                                                                           | `routes.ts`、`router.tsx`（`blogController`）、`layout.tsx` の nav、`app.css` の share 規則、`theme.ts` の `proseStyle`、`deno.json` の `@kuboon/md` `@kuboon/share-element` `@std/front-matter`                                                                                                       | —                              |
+| `showcase`       | `client/pages/showcase.tsx`、`client/islands/showcase/`、`server/versions.ts`                                                                                                              | `routes.ts`、`router.tsx`、`assets.ts` の `islands/showcase/*.tsx`、`layout.tsx` の nav、`deno.json` の `@remix-run/ui`、`router.test.ts` の `/showcase` 行                                                                                                                                            | —                              |
+| `fullscreen`     | `client/pages/fullscreen.tsx`、`client/islands/fullscreen-game.tsx`                                                                                                                        | `routes.ts`、`router.tsx`、`layout.tsx` の nav、`PageModule` の `viewport`/`bare`                                                                                                                                                                                                                      | —                              |
+| `spa`            | `client/pages/spa.tsx`、`client/spa/`                                                                                                                                                      | `routes.ts`、`router.tsx`（`spa` controller、`spaRuntime`）、`assets.ts` の `spa/entry.ts`、`runtime.ts`、`layout.tsx` の `documentLinks` と nav、`nav_auth.tsx` の `documentLinks`、`deno.json` の `@remix-run/spa`                                                                                   | —                              |
+| `helper`         | `client/helper/`                                                                                                                                                                           | `assets.ts` の `helper/panel.ts`、`runtime.ts` の `helper`、`layout.tsx` の Help ボタンと `ClientRuntime.helper`、`hydration.ts` の `installHelper()`、`spa/entry.ts`、`router.tsx` の `entryPoints` 末尾、`deno.json` の `@remix-kbn/helper-agent/*`                                                  | —                              |
+| `signin`         | `client/islands/{nav_auth,signout_button}.tsx`、`client/session.ts`、`client/idp.ts`、`client/pages/my.tsx`                                                                                | `routes.ts` の `my`、`layout.tsx` の `<NavAuth>`、`router.tsx`、`deno.json` の `@kuboon/dpop`                                                                                                                                                                                                          | `push` は signin に依存        |
+| `push`           | `client/islands/push_card.tsx`、`client/lib/push/`、`client/sw.js`                                                                                                                         | `router.tsx` の `/sw.js` ルートと `entryPoints`、`pages/my.tsx` の `<PushCard>`                                                                                                                                                                                                                        | `signin`                       |
+| `demo-panel`     | `client/islands/demo_card.tsx`                                                                                                                                                             | `pages/my.tsx` の `<DemoCard>`                                                                                                                                                                                                                                                                         | — (`server-send` の UI を含む) |
+| `server-send`    | `server/lib/push/`、`server/lib/signing-key*`、`server/gen_signing_key.ts`、`server/controllers/api/notify.ts`、`server/controllers/well_known.ts`、`.github/workflows/rp-signing-key.yml` | `routes.ts` の `jwks` と `api.notify`、`router.tsx`、`worker.ts`、`demo_card.tsx` の「サーバーから送信」、`server/config.ts` の `RP_*`、`deno.json` と `server/deno.json` の `gen:signing-key`、`cloudflare.config.ts` と `server/cf_secrets.ts` の `RP_SIGNING_KEY_JWK`                               | `push`、server モード          |
+| `turso`          | `server/lib/turso/`、`server/controllers/api/turso.ts`、`web/tests/turso_*`                                                                                                                | `routes.ts` の `api.turso`、`router.tsx`、`worker.ts`、`server/config.ts` の `TURSO_*`、`cloudflare.config.ts` の `TURSO_DATABASE_URL`、`server/cf_secrets.ts` と `cloudflare.yml` の `TURSO_AUTH_TOKEN`、`deno.json` の `@libsql/client` `@remix-run/data-table` `@remix-kbn/data-table-sqlite-turso` | server モード                  |
+| `protected-api`  | `server/controllers/api/controller.ts`、`server/middleware/dpop.ts`、`packages/*`                                                                                                          | `routes.ts` の `api.protected`、`router.tsx`、`worker.ts`、`deno.json` の `@scope/*` と workspace                                                                                                                                                                                                      | server モード                  |
 
 `api` の中身が全部消えたら、`routes.ts` の `api` 自体と `router.tsx` の `api`
 controller も消す。 `og/`（社会カード）は全ページが使うので残す。要らなければ

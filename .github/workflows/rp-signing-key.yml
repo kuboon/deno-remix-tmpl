@@ -1,8 +1,9 @@
 name: rp-signing-key
 
 # Generates a fresh ES256 key and stores it as the Worker secret RP_SIGNING_KEY_JWK — the key the
-# RP signs its `private_key_jwt` client assertions with (`web/server/lib/signing-key.ts`). Run it
-# once after the first deploy, and again to rotate the key. The private JWK never reaches the log:
+# RP signs its `private_key_jwt` client assertions with (`web/server/lib/signing-key.ts`). The
+# first deploy already creates one (`cloudflare.yml`, `web/server/cf_secrets.ts`); run this to
+# rotate it. The private JWK never reaches the log:
 # it is masked, and `deno task -q` keeps the task runner from echoing the command line.
 #
 # The Worker publishes the new public key at /.well-known/jwks.json as soon as the secret lands

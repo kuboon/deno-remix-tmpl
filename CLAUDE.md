@@ -100,18 +100,23 @@ Deno で catch 不能なエラーになる)。env は top-level await
   を付けて遷移し、戻った後 `${IDP_ORIGIN}/session` で userId を取得する。
 - `RP_ORIGIN` — このアプリの公開 origin。`POST /api/notify` のクライアント
   アサーションの `clientId`/`iss`/`sub` に使う。IdP の `AUTHORIZE_WHITELIST`
-  に登録が必要。未設定だと送信時にエラーになる。
+  に登録が必要。未設定なら、`POST /api/notify` のリクエストが来た origin を使う
+  （Cloudflare でも設定不要）。複数の origin
+  で受けるときに固定したければ設定する。
 - `RP_SIGNING_KEY_JWK` — 任意。ES256 秘密鍵 (JWK JSON)。未設定ならプロセス毎に
   生成
   (開発用)。本番では固定鍵を設定し、再起動で鍵がローテートしないようにする。
-  Cloudflare には `.github/workflows/rp-signing-key.yml`（手動実行）が鍵を作って
-  Worker の secret に入れる（再実行でローテート）。ローカルで作るなら
+  Cloudflare では `cloudflare.yml` が初回デプロイで鍵を作って Worker の secret
+  に入れる（`web/server/cf_secrets.ts`。既にあれば触らない）。ローテートは
+  `.github/workflows/rp-signing-key.yml` の手動実行。ローカルで作るなら
   `deno task gen:signing-key`。
 - `BASE_URL` — 静的ビルド専用。Pages のサブパス（PR プレビュー等）を `base`
   にする。server（`deno serve` / Cloudflare）は常にルート配信なので読まない
   （`web/server/deno.json` の `dev` 権限で ignore）。
 - `TURSO_DATABASE_URL` / `TURSO_AUTH_TOKEN` — `GET /api/turso` サンプル用の
-  Turso (libSQL) 接続。未設定なら 503 を返すのみ。
+  Turso (libSQL) 接続。未設定なら 503 を返すのみ。Cloudflare では URL を
+  `cloudflare.config.ts` に、token を repo secret `TURSO_AUTH_TOKEN` に置くと
+  `cloudflare.yml` がデプロイ時に Worker の secret に入れる。
 
 ## API のエラー応答 (RFC 9457)
 

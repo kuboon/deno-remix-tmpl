@@ -67,7 +67,9 @@ export const notifyAction = {
     }
 
     try {
-      const results = await sendRpNotification({ userIds, notification });
+      const results = await sendRpNotification({ userIds, notification }, {
+        origin: new URL(context.request.url).origin,
+      });
       return Response.json({ results });
     } catch (error) {
       return problem({

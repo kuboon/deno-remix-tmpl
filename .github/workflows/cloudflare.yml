@@ -19,6 +19,20 @@ jobs:
       # Static site (BASE_URL unset: served from the root) + Worker bundle,
       # arranged as the Build Output Specification for `cf deploy --prebuilt`.
       - run: deno task build:cf
-      - run: deno task cf deploy --prebuilt
+      # The secrets a first deploy needs, so a new Worker deploys with no manual setup:
+      # RP_SIGNING_KEY_JWK is generated when the Worker lacks it (never rotated here), and
+      # TURSO_AUTH_TOKEN comes from the repo secret when set. See web/server/cf_secrets.ts.
+      - name: Deploy
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          TURSO_AUTH_TOKEN: ${{ secrets.TURSO_AUTH_TOKEN }} # [feature:turso]
+        run: |
+          set -euo pipefail
+          secrets="$RUNNER_TEMP/secrets.json"
+          deno run -A web/server/cf_secrets.ts "$secrets"
+          if [ -f "$secrets" ]; then
+            deno task -q cf deploy --prebuilt --secrets-file "$secrets"
+            rm -f "$secrets"
+          else
+            deno task -q cf deploy --prebuilt
+          fi

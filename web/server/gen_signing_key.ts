@@ -6,7 +6,6 @@
  * at runtime by `lib/signing-key.ts`, so only the private JWK is stored.
  */
 
-import { exportJWK, generateKeyPair } from "jose";
+import { generatePrivateJwk } from "./lib/signing-key.ts";
 
-const { privateKey } = await generateKeyPair("ES256", { extractable: true });
-console.log(JSON.stringify(await exportJWK(privateKey)));
+console.log(await generatePrivateJwk());

@@ -62,6 +62,15 @@ const generate = async (): Promise<
 };
 
 /**
+ * A fresh ES256 private JWK as one line of JSON, the format `RP_SIGNING_KEY_JWK` takes. Used by
+ * `gen_signing_key.ts` and `cf_secrets.ts`; the public half and `kid` are derived on load.
+ */
+export const generatePrivateJwk = async (): Promise<string> => {
+  const { privateKey } = await generateKeyPair(ALG, { extractable: true });
+  return JSON.stringify(await exportJWK(privateKey));
+};
+
+/**
  * Load (or generate-on-first-use) the RP's signing key. Idempotent; later
  * callers receive the cached value.
  */
