@@ -13,13 +13,13 @@ import type { Version } from "../client/pages/showcase.tsx";
 /**
  * Reads the versions the site is built against.
  *
- * @returns One badge per package, plus the running Deno
+ * @returns One badge per package
  */
 export function versions(): Version[] {
   return [
     { label: "@remix-run/component", value: resolved("@remix-run/component") },
+    { label: "@remix-run/ui", value: resolved("@remix-run/ui") },
     { label: "@remix-kbn/ssg", value: resolved("@remix-kbn/ssg") },
-    { label: "Deno", value: Deno.version.deno },
   ];
 }
 
